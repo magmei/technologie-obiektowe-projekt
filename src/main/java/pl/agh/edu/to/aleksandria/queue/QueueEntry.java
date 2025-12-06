@@ -1,32 +1,38 @@
-package pl.agh.edu.to.aleksandria.rental;
+package pl.agh.edu.to.aleksandria.queue;
 
 import jakarta.persistence.*;
 import pl.agh.edu.to.aleksandria.book.Book;
 import pl.agh.edu.to.aleksandria.user.User;
 
-import java.time.LocalDate;
-
 @Entity
-public class Rental {
+@Table(name="queue")
+public class QueueEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TITLE_ID")
     private Book book;
-    private LocalDate rentedOn;
-    private LocalDate due;
 
-    public Rental() {}
+    public QueueEntry() {}
 
-    public Rental(User user, Book book, LocalDate rentedOn, LocalDate due) {
+    public QueueEntry(User user, Book book) {
         this.user = user;
         this.book = book;
-        this.rentedOn = rentedOn;
-        this.due = due;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+
 }
