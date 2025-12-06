@@ -1,9 +1,10 @@
 package pl.agh.edu.to.aleksandria.book;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import pl.agh.edu.to.aleksandria.genre.Genre;
+import pl.agh.edu.to.aleksandria.title.Title;
+
+import java.util.List;
 
 @Entity
 public class Book {
@@ -12,10 +13,19 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long itemId;
 
-    private int titleId;
+    @ManyToOne
+    private Title title;
+    private boolean available;
+
 
     public Book() {}
-    public Book(int titleId) {
-        this.titleId = titleId;
+    public Book(Title title, boolean available) {
+        this.title = title;
+        this.available = available;
+    }
+
+    @Override
+    public String toString() {
+        return title.toString();
     }
 }
