@@ -2,6 +2,7 @@ package pl.agh.edu.to.aleksandria;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import pl.agh.edu.to.aleksandria.book.Book;
 import pl.agh.edu.to.aleksandria.book.BookRepository;
 import pl.agh.edu.to.aleksandria.genre.Genre;
@@ -16,6 +17,7 @@ import pl.agh.edu.to.aleksandria.user.UserRepository;
 import java.util.List;
 
 @Configuration
+@DependsOn("roleConfiguration")
 public class TestConfiguration {
 
     UserRepository userRepository;
@@ -33,12 +35,13 @@ public class TestConfiguration {
     }
 
     @PostConstruct
-    private void initUsers() {
-        Role testRole = new Role("czytelnik");
-        roleRepository.save(testRole);
+    private void initDB() {
+        Role readerRole = roleRepository.findByName("reader").get();
+        Role librarianRole = roleRepository.findByName("librarian").get();
 
-        User testUser = new User("Jan", "Testowy", "ul. Tymczasowa 1/2", "jan.testowy@poczta.pl", testRole);
-        userRepository.save(testUser);
+        User testUser = new User("Jan", "Testowy", "ul. Tymczasowa 1/2", "jan.testowy@poczta.pl", readerRole);
+        User testEmployee = new User("Adam", "Bibliotekarz", "ul. Kawiory 21", "adam.biliot@gmail.com", librarianRole);
+        userRepository.saveAll(List.of(testUser, testEmployee));
 
         Genre dystopia = new Genre("Dystopia");
         Genre political = new Genre("Political");
@@ -53,6 +56,7 @@ public class TestConfiguration {
 
         System.out.println(userRepository.findAll());
         System.out.println(bookRepository.findAll());
+        System.out.println(roleRepository.findAll());
     }
 
 }
