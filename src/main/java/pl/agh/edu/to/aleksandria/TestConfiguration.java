@@ -3,16 +3,17 @@ package pl.agh.edu.to.aleksandria;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import pl.agh.edu.to.aleksandria.book.Book;
-import pl.agh.edu.to.aleksandria.book.BookRepository;
-import pl.agh.edu.to.aleksandria.genre.Genre;
-import pl.agh.edu.to.aleksandria.genre.GenreRepository;
-import pl.agh.edu.to.aleksandria.role.Role;
-import pl.agh.edu.to.aleksandria.role.RoleRepository;
-import pl.agh.edu.to.aleksandria.title.Title;
-import pl.agh.edu.to.aleksandria.title.TitleRepository;
-import pl.agh.edu.to.aleksandria.user.User;
-import pl.agh.edu.to.aleksandria.user.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import pl.agh.edu.to.aleksandria.model.book.Book;
+import pl.agh.edu.to.aleksandria.model.book.BookRepository;
+import pl.agh.edu.to.aleksandria.model.genre.Genre;
+import pl.agh.edu.to.aleksandria.model.genre.GenreRepository;
+import pl.agh.edu.to.aleksandria.model.role.Role;
+import pl.agh.edu.to.aleksandria.model.role.RoleRepository;
+import pl.agh.edu.to.aleksandria.model.title.Title;
+import pl.agh.edu.to.aleksandria.model.title.TitleRepository;
+import pl.agh.edu.to.aleksandria.model.user.User;
+import pl.agh.edu.to.aleksandria.model.user.UserRepository;
 
 import java.util.List;
 
@@ -20,28 +21,32 @@ import java.util.List;
 @DependsOn("roleConfiguration")
 public class TestConfiguration {
 
+    private final PasswordEncoder passwordEncoder;
     UserRepository userRepository;
     RoleRepository roleRepository;
     BookRepository bookRepository;
     GenreRepository genreRepository;
     TitleRepository titleRepository;
 
-    public TestConfiguration(UserRepository userRepository, RoleRepository roleRepository, BookRepository bookRepository, GenreRepository genreRepository, TitleRepository titleRepository) {
+    public TestConfiguration(UserRepository userRepository, RoleRepository roleRepository, BookRepository bookRepository, GenreRepository genreRepository, TitleRepository titleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.bookRepository = bookRepository;
         this.genreRepository = genreRepository;
         this.titleRepository = titleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
     private void initDB() {
         Role readerRole = roleRepository.findByName("reader").get();
         Role librarianRole = roleRepository.findByName("librarian").get();
+        Role adminRole = roleRepository.findByName("admin").get();
 
-        User testUser = new User("Jan", "Testowy", "ul. Tymczasowa 1/2", "jan.testowy@poczta.pl", readerRole);
-        User testEmployee = new User("Adam", "Bibliotekarz", "ul. Kawiory 21", "adam.biliot@gmail.com", librarianRole);
-        userRepository.saveAll(List.of(testUser, testEmployee));
+        User testUser = new User("Jan", "Testowy", "ul. Tymczasowa 1/2", "jan.testowy@poczta.pl", passwordEncoder.encode("test1234"), readerRole);
+        User testEmployee = new User("Adam", "Bibliotekarz", "ul. Kawiory 21", "adam.biliot@gmail.com", passwordEncoder.encode("test1234"), librarianRole);
+        User testAdmin = new User("Marta", "Admin", "ul. Admina 7", "admin@aleksandria.pl", passwordEncoder.encode("adminpass"), adminRole);
+        userRepository.saveAll(List.of(testUser, testEmployee, testAdmin));
 
         Genre dystopia = new Genre("Dystopia");
         Genre political = new Genre("Political");
