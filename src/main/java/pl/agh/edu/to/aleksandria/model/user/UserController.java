@@ -79,8 +79,7 @@ public class UserController {
 
     // PUT /users/update
     @PutMapping("update")
-    @PreAuthorize("hasRole('ADMIN')" +
-            "or #request.id == principal.id") // TODO: librarian can also update other users except ADMINs
+    @PreAuthorize("@roleSecurity.canModify(#request.id) or #request.id == #principal.id")
     public ResponseEntity<Object> updateUser(@RequestBody UpdateUserRequest request) {
         return userService.updateUser(request)
                 .<ResponseEntity<Object>>map(ResponseEntity::ok)
@@ -92,7 +91,7 @@ public class UserController {
 
     // DELETE /users/delete
     @DeleteMapping("delete")
-    @PreAuthorize("hasRole('ADMIN')") // TODO: librarian can also delete non-ADMIN users
+    @PreAuthorize("@roleSecurity.canModify(#id)")
     public ResponseEntity<Object> deleteUser(@RequestParam Integer id) {
         boolean deleted = userService.deleteUser(id);
 
