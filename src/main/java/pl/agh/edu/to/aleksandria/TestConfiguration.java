@@ -41,10 +41,12 @@ public class TestConfiguration {
     private void initDB() {
         Role readerRole = roleRepository.findByName("reader").get();
         Role librarianRole = roleRepository.findByName("librarian").get();
+        Role adminRole = roleRepository.findByName("admin").get();
 
         User testUser = new User("Jan", "Testowy", "ul. Tymczasowa 1/2", "jan.testowy@poczta.pl", passwordEncoder.encode("test1234"), readerRole);
         User testEmployee = new User("Adam", "Bibliotekarz", "ul. Kawiory 21", "adam.biliot@gmail.com", passwordEncoder.encode("test1234"), librarianRole);
-        userRepository.saveAll(List.of(testUser, testEmployee));
+        User testAdmin = new User("Marta", "Admin", "ul. Admina 7", "admin@aleksandria.pl", passwordEncoder.encode("adminpass"), adminRole);
+        userRepository.saveAll(List.of(testUser, testEmployee, testAdmin));
 
         Genre dystopia = new Genre("Dystopia");
         Genre political = new Genre("Political");

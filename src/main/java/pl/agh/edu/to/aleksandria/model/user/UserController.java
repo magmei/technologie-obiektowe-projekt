@@ -2,6 +2,7 @@ package pl.agh.edu.to.aleksandria.model.user;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.to.aleksandria.model.user.dtos.CreateUserRequest;
 import pl.agh.edu.to.aleksandria.model.user.dtos.UpdateUserRequest;
@@ -21,12 +22,14 @@ public class UserController {
 
     // GET /users/all
     @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // GET /users/search/id
     @GetMapping("/search/by_id")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN') or #id == principal.id")
     public ResponseEntity<Object> getUserById(@RequestParam Integer id) {
         return userService.getUserById(id)
                 .<ResponseEntity<Object>>map(ResponseEntity::ok)
@@ -38,12 +41,14 @@ public class UserController {
 
     // GET /users/search/by_role/role
     @GetMapping("/search/by_role")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public List<User> getUsersByRole(@RequestParam String role) {
         return userService.getUsersByRole(role);
     }
 
     // GET /users/search/by_email
     @GetMapping("/search/by_email")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN') or #email == principal.email")
     public ResponseEntity<Object> getUsersByEmail(@RequestParam String email) {
         return userService.getUserByEmail(email)
                 .<ResponseEntity<Object>>map(ResponseEntity::ok)
@@ -55,12 +60,14 @@ public class UserController {
 
     // GET /users/search/by_fullname/
     @GetMapping("/search/by_fullname")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public List<User> getUsersByFullName(@RequestParam String firstName, @RequestParam String lastName) {
         return userService.getUsersByFullName(firstName, lastName);
     }
 
     // POST /users/create
     @PostMapping("create")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('LIBRARIAN') and #request.roleName != 'ADMIN')")
     public ResponseEntity<Object> createUser(@RequestBody CreateUserRequest request) {
         return userService.createUser(request)
                 .<ResponseEntity<Object>>map(ResponseEntity::ok)
@@ -72,6 +79,8 @@ public class UserController {
 
     // PUT /users/update
     @PutMapping("update")
+    @PreAuthorize("hasRole('ADMIN')" +
+            "or #request.id == principal.id") // TODO: librarian can also update other users except ADMINs
     public ResponseEntity<Object> updateUser(@RequestBody UpdateUserRequest request) {
         return userService.updateUser(request)
                 .<ResponseEntity<Object>>map(ResponseEntity::ok)
@@ -83,6 +92,7 @@ public class UserController {
 
     // DELETE /users/delete
     @DeleteMapping("delete")
+    @PreAuthorize("hasRole('ADMIN')") // TODO: librarian can also delete non-ADMIN users
     public ResponseEntity<Object> deleteUser(@RequestParam Integer id) {
         boolean deleted = userService.deleteUser(id);
 

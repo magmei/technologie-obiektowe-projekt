@@ -1,5 +1,6 @@
 package pl.agh.edu.to.aleksandria.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -13,17 +14,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import pl.agh.edu.to.aleksandria.security.JwtAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authProvider;
-
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, AuthenticationProvider authProvider) {
-        this.jwtAuthFilter = jwtAuthFilter;
-        this.authProvider = authProvider;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
