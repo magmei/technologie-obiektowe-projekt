@@ -17,8 +17,8 @@ Projekt wykorzystuje następujące technologie i biblioteki:
 
 ## 3. Architektura i model danych
 
-### Struktura encji
-System opiera się na relacyjnym modelu danych z następującymi kluczowymi encjami:
+### Struktura klas
+System opiera się na relacyjnym modelu danych z następującymi kluczowymi klasami:
 
 1.  **User (`users`)**:
     * Przechowuje dane osobowe, adresowe oraz poświadczenia.
@@ -36,6 +36,11 @@ System opiera się na relacyjnym modelu danych z następującymi kluczowymi encj
     * Kategorie książek.
 6.  **Rental (`rental`)** i **Queue (`queue`)**:
     * Obsługa procesów wypożyczania i kolejkowania.
+
+### Model bazy danych
+
+<img width="1159" height="653" alt="Zrzut ekranu 2025-12-9 o 13 20 59" src="https://github.com/user-attachments/assets/ae569fe7-2dcf-4349-a97c-e0353bf45387" />
+
 
 ## 4. Bezpieczeństwo
 
