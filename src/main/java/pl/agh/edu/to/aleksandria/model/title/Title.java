@@ -12,7 +12,7 @@ public class Title {
     @GeneratedValue
     private int id;
 
-    private String title;
+    private String titleName;
     private String author;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -25,13 +25,13 @@ public class Title {
 
     public Title() {}
     public Title(String title, String author, List<Genre> genres) {
-        this.title = title;
+        this.titleName = title;
         this.author = author;
         this.genres = genres;
     }
 
     @Override
     public String toString() {
-        return title + ", " + author + ", " + genres;
+        return titleName + ", " + author + ", " + genres;
     }
 }
