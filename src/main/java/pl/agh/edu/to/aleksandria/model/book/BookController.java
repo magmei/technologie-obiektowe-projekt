@@ -64,7 +64,7 @@ public class BookController {
     }
 
     // PUT /books/change_availability?id=?available=
-    @PostMapping("/change_availability")
+    @PutMapping("/update_availability")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> changeAvailability(@RequestParam Integer id, @RequestParam boolean availability) {
         return bookService.changeAvailability(id, availability)
@@ -76,7 +76,7 @@ public class BookController {
     }
 
     // DELETE /books/delete?id=
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> deleteBook(@RequestParam Integer id) {
         boolean deleted = bookService.deleteBook(id);

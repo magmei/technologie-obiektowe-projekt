@@ -30,12 +30,12 @@ public class Genre {
         this.name = name;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public void addTitle(Title title) {
         titles.add(title);
+    }
+
+    public void removeTitle(Title title) {
+        titles.remove(title);
     }
 
     @Override

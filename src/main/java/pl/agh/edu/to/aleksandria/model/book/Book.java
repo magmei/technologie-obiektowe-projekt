@@ -14,10 +14,11 @@ public class Book {
 
     @ManyToOne
     private Title title;
+
     @Setter
     @Getter
     private boolean available;
-    
+
     public Book() {}
     public Book(Title title, boolean available) {
         this.title = title;
