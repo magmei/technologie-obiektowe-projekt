@@ -1,7 +1,11 @@
 package pl.agh.edu.to.aleksandria.model.role;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name="roles")
 public class Role {
@@ -17,18 +21,6 @@ public class Role {
 
     public Role(String name) {
         this.name = name;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override
