@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/books")
@@ -29,12 +30,11 @@ public class BookController {
     @GetMapping("/search/by_id")
     @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> getBookById(@RequestParam Integer id) {
-        return bookService.getBookById(id)
-                .<ResponseEntity<Object>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of(
-                                "error", "No book with this ID found"
-                        )));
+        return this.optionalToResponseEntity(
+                bookService.getBookById(id),
+                HttpStatus.NOT_FOUND,
+                "No book with this ID found"
+        );
     }
 
     // GET /books/search/by_availability?available=
@@ -55,24 +55,22 @@ public class BookController {
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> createBook(Integer title_id) {
-        return bookService.createBook(title_id)
-                .<ResponseEntity<Object>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of(
-                                "error", "Could not create book for this title"
-                        )));
+        return this.optionalToResponseEntity(
+                bookService.createBook(title_id),
+                HttpStatus.BAD_REQUEST,
+                "Could not create book for this title"
+        );
     }
 
     // PUT /books/change_availability?id=?available=
     @PutMapping("/update_availability")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> changeAvailability(@RequestParam Integer id, @RequestParam boolean availability) {
-        return bookService.changeAvailability(id, availability)
-                .<ResponseEntity<Object>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of(
-                                "error", "Could not update book with this id"
-                        )));
+        return this.optionalToResponseEntity(
+                bookService.changeAvailability(id, availability),
+                HttpStatus.BAD_REQUEST,
+                "Could not update book with this id"
+        );
     }
 
     // DELETE /books/delete?id=
@@ -87,5 +85,10 @@ public class BookController {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "Book not found"));
+    }
+
+    private ResponseEntity<Object> optionalToResponseEntity(Optional<Book> book, HttpStatus status, String error) {
+        return book.<ResponseEntity<Object>>map(ResponseEntity::ok).orElse(
+                ResponseEntity.status(status).body(Map.of("error", error)));
     }
 }
