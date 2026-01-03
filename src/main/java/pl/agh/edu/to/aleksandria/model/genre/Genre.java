@@ -5,26 +5,26 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 
 import java.util.List;
 
-@Getter
-@Setter
 @Entity
+@Getter
+@NoArgsConstructor
 public class Genre {
 
     @Id
     @GeneratedValue
     private int id;
 
+    @Setter
     private String name;
 
     @ManyToMany(mappedBy = "genres")
     private List<Title> titles;
-
-    public Genre() {}
 
     public Genre(String name) {
         this.name = name;

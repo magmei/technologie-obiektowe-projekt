@@ -2,6 +2,7 @@ package pl.agh.edu.to.aleksandria.model.book;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.title.TitleRepository;
@@ -10,15 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
     private final TitleRepository titleRepository;
-
-    public BookService(BookRepository bookRepository, TitleRepository titleRepository) {
-        this.bookRepository = bookRepository;
-        this.titleRepository = titleRepository;
-    }
 
     @PostConstruct
     public void onServiceStarted() {

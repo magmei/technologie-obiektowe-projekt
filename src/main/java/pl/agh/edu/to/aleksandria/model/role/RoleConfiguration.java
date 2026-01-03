@@ -1,18 +1,16 @@
 package pl.agh.edu.to.aleksandria.model.role;
 
 import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 @Configuration
+@AllArgsConstructor
 public class RoleConfiguration {
 
     RoleRepository roleRepository;
-
-    public RoleConfiguration(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
 
 //    @PostConstruct
 //    private void initRoles() {

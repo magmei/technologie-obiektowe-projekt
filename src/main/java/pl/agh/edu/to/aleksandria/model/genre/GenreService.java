@@ -2,6 +2,7 @@ package pl.agh.edu.to.aleksandria.model.genre;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.agh.edu.to.aleksandria.model.genre.dtos.UpdateGenreRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
@@ -11,13 +12,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class GenreService {
 
     private final GenreRepository genreRepository;
-
-    public GenreService(GenreRepository genreRepository) {
-        this.genreRepository = genreRepository;
-    }
 
     @PostConstruct
     public void onServiceStarted() {

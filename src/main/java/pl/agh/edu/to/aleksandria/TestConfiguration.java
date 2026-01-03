@@ -1,6 +1,7 @@
 package pl.agh.edu.to.aleksandria;
 
 import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import pl.agh.edu.to.aleksandria.model.user.UserRepository;
 import java.util.List;
 
 @Configuration
+@AllArgsConstructor
 public class TestConfiguration {
 
     private final PasswordEncoder passwordEncoder;
@@ -26,15 +28,6 @@ public class TestConfiguration {
     BookRepository bookRepository;
     GenreRepository genreRepository;
     TitleRepository titleRepository;
-
-    public TestConfiguration(UserRepository userRepository, RoleRepository roleRepository, BookRepository bookRepository, GenreRepository genreRepository, TitleRepository titleRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.bookRepository = bookRepository;
-        this.genreRepository = genreRepository;
-        this.titleRepository = titleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @PostConstruct
     private void initDB() {
