@@ -27,7 +27,7 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    // GET /users/search/id
+    // GET /users/search/by_id?id=
     @GetMapping("/search/by_id")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN') or #id == principal.id")
     public ResponseEntity<Object> getUserById(@RequestParam Integer id) {
@@ -39,14 +39,14 @@ public class UserController {
                         )));
     }
 
-    // GET /users/search/by_role/role
+    // GET /users/search/by_role?role=
     @GetMapping("/search/by_role")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public List<User> getUsersByRole(@RequestParam String role) {
         return userService.getUsersByRole(role);
     }
 
-    // GET /users/search/by_email
+    // GET /users/search/by_email?email=
     @GetMapping("/search/by_email")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN') or #email == principal.email")
     public ResponseEntity<Object> getUsersByEmail(@RequestParam String email) {
@@ -58,7 +58,7 @@ public class UserController {
                         )));
     }
 
-    // GET /users/search/by_fullname/
+    // GET /users/search/by_fullname?firstName=?lastName=
     @GetMapping("/search/by_fullname")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public List<User> getUsersByFullName(@RequestParam String firstName, @RequestParam String lastName) {
@@ -89,7 +89,7 @@ public class UserController {
                         )));
     }
 
-    // DELETE /users/delete
+    // DELETE /users/delete?id=
     @DeleteMapping("delete")
     @PreAuthorize("@roleSecurity.canModify(#id)")
     public ResponseEntity<Object> deleteUser(@RequestParam Integer id) {
