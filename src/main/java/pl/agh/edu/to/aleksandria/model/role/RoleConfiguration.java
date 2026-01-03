@@ -14,14 +14,12 @@ public class RoleConfiguration {
         this.roleRepository = roleRepository;
     }
 
-    @PostConstruct
-    private void initRoles() {
-        Role readerRole = new Role("reader");
-        Role librarianRole = new Role("librarian");
-        Role adminRole = new Role("admin");
-
-        roleRepository.saveAll(List.of(readerRole, librarianRole, adminRole));
-        System.out.println(roleRepository.findAll());
-    }
-
+//    @PostConstruct
+//    private void initRoles() {
+//        Role readerRole = new Role("reader");
+//        Role librarianRole = new Role("librarian");
+//        Role adminRole = new Role("admin");
+//
+//        roleRepository.saveAll(List.of(readerRole, librarianRole, adminRole));
+//    }
 }
