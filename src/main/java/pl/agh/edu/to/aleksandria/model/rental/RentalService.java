@@ -37,8 +37,8 @@ public class RentalService {
         return rentalRepository.findAll();
     }
 
-    public List<Rental> getRentalsByBook(Book book) {
-        return rentalRepository.findByBook(book);
+    public List<Rental> getRentalsByBook(Long bookId) {
+        return rentalRepository.findByBook_ItemId(bookId);
     }
 
     public List<Rental> getRentalsByTitle(Title title) {
@@ -46,12 +46,19 @@ public class RentalService {
         // TODO
     }
 
-    public Rental getRentalById(Integer id) {
-        return rentalRepository.findById(id).orElse(null);
+    public Optional<Rental> getRentalById(Integer id) {
+        return Optional.ofNullable(rentalRepository.findById(id).orElse(null));
     }
 
-    public Rental getRentalsByUser(Long userId) {
+    public List<Rental> getRentalsByUser(Long userId) {
         return rentalRepository.findByUser_Id(userId);
+    }
+
+    public List<Rental> getRentalsByDateRange(LocalDate startDate, LocalDate endDate) {
+        return rentalRepository.findAll().stream()
+                .filter(rental -> !rental.getRentedOn().isAfter(endDate) &&
+                        !rental.getRentedOn().isBefore(startDate))
+                .toList();
     }
 
     public Optional<Rental> createRental(CreateRentalRequest request) {
