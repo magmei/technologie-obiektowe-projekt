@@ -21,7 +21,7 @@ public class User implements UserDetails {
     @Id
     @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Setter
     @Getter
@@ -70,7 +70,12 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return firstName + " " + lastName + ", " + role;
+        return "User{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 
 }

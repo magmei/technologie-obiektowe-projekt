@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.agh.edu.to.aleksandria.model.book.Book;
+import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.user.User;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -19,14 +21,21 @@ public class QueueEntry {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Getter
+    @Setter
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TITLE_ID")
-    private Book book;
+    private Title title;
+    
+    @Getter
+    @Setter
+    private LocalDateTime requestDate;
 
-    public QueueEntry(User user, Book book) {
+    public QueueEntry(User user, Title title, LocalDateTime requestDate) {
         this.user = user;
-        this.book = book;
+        this.title = title;
+        this.requestDate = requestDate;
     }
 }

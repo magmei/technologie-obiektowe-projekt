@@ -9,6 +9,9 @@ import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookRepository;
 import pl.agh.edu.to.aleksandria.model.genre.Genre;
 import pl.agh.edu.to.aleksandria.model.genre.GenreRepository;
+import pl.agh.edu.to.aleksandria.model.queue.QueueRepository;
+import pl.agh.edu.to.aleksandria.model.queue.QueueService;
+import pl.agh.edu.to.aleksandria.model.queue.dtos.AddToQueueRequest;
 import pl.agh.edu.to.aleksandria.model.rental.Rental;
 import pl.agh.edu.to.aleksandria.model.rental.RentalRepository;
 import pl.agh.edu.to.aleksandria.model.rental.RentalService;
@@ -34,8 +37,10 @@ public class TestConfiguration {
     GenreRepository genreRepository;
     TitleRepository titleRepository;
     RentalRepository rentalRepository;
+    QueueRepository queueRepository;
 
     RentalService rentalService;
+    QueueService queueService;
 
     @PostConstruct
     private void initDB() {
@@ -52,5 +57,29 @@ public class TestConfiguration {
             System.out.println("Rental: " + rental);
         }
         rentalService.deleteRental(rentalOpt.get().getId());
+
+        queueService.addUserToQueue(new AddToQueueRequest(1, 1));
+        queueService.addUserToQueue(new AddToQueueRequest(2, 1));
+        queueService.addUserToQueue(new AddToQueueRequest(3, 2));
+        queueService.addUserToQueue(new AddToQueueRequest(1, 2));
+
+        System.out.println("queue: user 1 for book 1: " + queueService.getPositionInQueue(1, 1));
+        System.out.println("queue: user 2 for book 1: " + queueService.getPositionInQueue(2, 1));
+        System.out.println("queue: user 1 for book 2: " + queueService.getPositionInQueue(1, 2));
+
+        System.out.println("Users in queue for book 1: " + queueService.getUsersWaitingForTitle(1).size());
+        System.out.println("Users in queue for book 2: " + queueService.getUsersWaitingForTitle(2).size());
+
+        queueService.removeUserFromQueue(1,1);
+        queueService.removeUserFromQueue(1, 2);
+
+        System.out.println("queue: user 2 for book 1: " + queueService.getPositionInQueue(2, 1));
+        System.out.println("queue: user 3 for book 2: " + queueService.getPositionInQueue(3, 2));
+
+        System.out.println("Users in queue for book 1: " + queueService.getUsersWaitingForTitle(1).size());
+        System.out.println("Users in queue for book 2: " + queueService.getUsersWaitingForTitle(2).size());
+
+        queueService.removeUserFromQueue(2,1);
+        queueService.removeUserFromQueue(3,2);
     }
 }
