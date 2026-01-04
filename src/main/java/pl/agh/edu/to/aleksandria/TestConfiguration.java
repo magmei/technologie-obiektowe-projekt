@@ -13,6 +13,7 @@ import pl.agh.edu.to.aleksandria.model.rental.Rental;
 import pl.agh.edu.to.aleksandria.model.rental.RentalRepository;
 import pl.agh.edu.to.aleksandria.model.rental.RentalService;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
+import pl.agh.edu.to.aleksandria.model.review.ReviewRepository;
 import pl.agh.edu.to.aleksandria.model.role.RoleRepository;
 import pl.agh.edu.to.aleksandria.model.title.TitleRepository;
 import pl.agh.edu.to.aleksandria.model.user.UserRepository;
@@ -31,6 +32,7 @@ public class TestConfiguration {
     TitleRepository titleRepository;
     RentalRepository rentalRepository;
     QueueRepository queueRepository;
+    ReviewRepository reviewRepository;
 
     RentalService rentalService;
     QueueService queueService;
@@ -74,5 +76,7 @@ public class TestConfiguration {
 
         queueService.removeUserFromQueue(new QueueRequest(2 , 1));
         queueService.removeUserFromQueue(new QueueRequest(3 , 2));
+
+        System.out.println("Reviews of book 1: " + reviewRepository.findByTitleId(1));
     }
 }
