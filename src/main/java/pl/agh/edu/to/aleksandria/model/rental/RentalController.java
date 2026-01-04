@@ -44,28 +44,28 @@ public class RentalController {
     // GET /rentals/search/by_user?user_id=
     @GetMapping("/search/by_user")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByUser(Long user_id) {
+    public List<Rental> getRentalsByUser(@RequestParam Long user_id) {
         return rentalService.getRentalsByUser(user_id);
     }
 
     // GET /rentals/search/by_book?book_id=
     @GetMapping("/search/by_book")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByBook(Long book_id) {
+    public List<Rental> getRentalsByBook(@RequestParam Long book_id) {
         return rentalService.getRentalsByBook(book_id);
     }
 
     // GET /rentals/search/by_date_range?start_date=&end_date=
     @GetMapping("/search/by_date_range")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByDateRange(LocalDate start_date, LocalDate end_date) {
+    public List<Rental> getRentalsByDateRange(@RequestParam LocalDate start_date, @RequestParam LocalDate end_date) {
         return rentalService.getRentalsByDateRange(start_date, end_date);
     }
 
     // GET /rentals/search/by_date?date=
     @GetMapping("/search/by_date")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByDate(LocalDate date) {
+    public List<Rental> getRentalsByDate(@RequestParam LocalDate date) {
         return rentalService.getRentalsByDateRange(date, date);
     }
 
@@ -86,10 +86,10 @@ public class RentalController {
         );
     }
 
-    // POST /rentals/return
+    // POST /rentals/return?rental_id=
     @PostMapping("/return")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public ResponseEntity<Object> returnRental(Integer rental_id) {
+    public ResponseEntity<Object> returnRental(@RequestParam Integer rental_id) {
         return this.optionalToResponseEntity(
                 rentalService.returnRental(rental_id),
                 HttpStatus.BAD_REQUEST,
@@ -101,6 +101,7 @@ public class RentalController {
     // *** DELETE endpoints ***
     // ========================
 
+    // DELETE /rentals/delete?id=
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> deleteRental(@RequestParam Integer id) {

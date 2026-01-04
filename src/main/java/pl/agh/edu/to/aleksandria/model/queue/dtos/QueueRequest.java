@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AddToQueueRequest {
+public class QueueRequest {
     private int userId;
     private int titleId;
 }

@@ -3,11 +3,8 @@ package pl.agh.edu.to.aleksandria.model.queue;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.to.aleksandria.model.book.Book;
-import pl.agh.edu.to.aleksandria.model.book.BookService;
-import pl.agh.edu.to.aleksandria.model.queue.dtos.AddToQueueRequest;
+import pl.agh.edu.to.aleksandria.model.queue.dtos.QueueRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.title.TitleService;
 import pl.agh.edu.to.aleksandria.model.user.User;
@@ -46,9 +43,9 @@ public class QueueService {
         return entries.stream().map(QueueEntry::getUser).toList();
     }
 
-    public Optional<QueueEntry> addUserToQueue(AddToQueueRequest addToQueueRequest) {
-        int userId = addToQueueRequest.getUserId();
-        int titleId = addToQueueRequest.getTitleId();
+    public Optional<QueueEntry> addUserToQueue(QueueRequest queueRequest) {
+        int userId = queueRequest.getUserId();
+        int titleId = queueRequest.getTitleId();
         Optional<User> userOpt = userService.getUserById(userId);
         if (userOpt.isEmpty()) {
             return Optional.empty();
@@ -91,22 +88,25 @@ public class QueueService {
         return -1;
     }
 
-    public void removeUserFromQueue(int userId, int titleId) {
+    public boolean removeUserFromQueue(QueueRequest request) {
+        int userId = request.getUserId();
+        int titleId = request.getTitleId();
         Optional<User> userOpt = userService.getUserById(userId);
         if (userOpt.isEmpty()) {
-            return;
+            return false;
         }
         Optional<Title> titleOpt = titleService.getTitleById(titleId);
         if (titleOpt.isEmpty()) {
-            return;
+            return false;
         }
 
         List<QueueEntry> allEntries = queueRepository.findAllByTitle(titleOpt.get());
         for (QueueEntry entry : allEntries) {
             if (entry.getUser().getId().equals(userOpt.get().getId())) {
                 queueRepository.delete(entry);
-                return;
+                return true;
             }
         }
+        return false;
     }
 }
