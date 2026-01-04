@@ -32,7 +32,7 @@ public class BookService {
     }
 
     public Optional<Book> getBookById(Integer id) {
-        return bookRepository.findById(id);
+        return Optional.ofNullable(bookRepository.findByItemId(id));
     }
 
     public List<Book> getBooksByAvailability(boolean availability) {

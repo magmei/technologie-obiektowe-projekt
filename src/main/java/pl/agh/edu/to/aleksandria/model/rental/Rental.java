@@ -22,6 +22,7 @@ public class Rental {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Getter
     private Book book;
 
     @Getter
@@ -32,10 +33,33 @@ public class Rental {
     @Setter
     private LocalDate due;
 
-    public Rental(User user, Book book, LocalDate rentedOn, LocalDate due) {
+    @Getter
+    @Setter
+    private LocalDate returnedOn;
+
+    public Rental(User user, Book book, LocalDate rentedOn, LocalDate due, LocalDate returnedOn) {
         this.user = user;
         this.book = book;
         this.rentedOn = rentedOn;
         this.due = due;
+        this.returnedOn = returnedOn;
+    }
+
+    @Override
+    public String toString() {
+        String userRep = (user == null) ? "null"
+                : user.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(user));
+        String bookRep = (book == null) ? "null"
+                : book.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(book));
+
+        return "Rental{" +
+                "id=" + id +
+                ", user=" + userRep +
+                ", book=" + bookRep +
+                ", rentedOn=" + rentedOn +
+                ", due=" + due +
+                ", returnedOn=" + returnedOn +
+                '}';
     }
 }
+

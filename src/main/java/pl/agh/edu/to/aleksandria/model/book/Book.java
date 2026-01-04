@@ -13,7 +13,7 @@ public class Book {
     @Id
     @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long itemId;
+    private Integer itemId;
 
     @ManyToOne
     private Title title;
