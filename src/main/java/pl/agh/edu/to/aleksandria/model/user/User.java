@@ -1,5 +1,6 @@
 package pl.agh.edu.to.aleksandria.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,6 +44,7 @@ public class User implements UserDetails {
     @Setter
     @Getter
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Getter
