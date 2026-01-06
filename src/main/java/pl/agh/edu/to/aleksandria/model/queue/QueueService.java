@@ -33,7 +33,9 @@ public class QueueService {
         System.out.println("Queue service destroyed");
     }
 
-    // TODO: all queues per user
+    public List<QueueEntry> getAllUserQueueEntries(long userId) {
+        return queueRepository.findAllByUser_Id(userId);
+    }
 
     public List<User> getUsersWaitingForTitle(int titleId) {
         Optional<Title> titleOpt = titleService.getTitleById(titleId);
@@ -68,6 +70,7 @@ public class QueueService {
     }
 
     public int getPositionInQueue(int userId, int titleId) {
+        // returns -1 if user or title not found or user not in queue
         Optional<User> userOpt = userService.getUserById(userId);
         if (userOpt.isEmpty()) {
             return -1;
@@ -84,7 +87,7 @@ public class QueueService {
         allEntries.sort(Comparator.comparing(QueueEntry::getRequestDate));
         for (int i = 0; i < allEntries.size(); i++) {
             if (allEntries.get(i).getUser().getId().equals(userOpt.get().getId())) {
-                return i + 1; // positions are 1-based
+                return i + 1;
             }
         }
         return -1;

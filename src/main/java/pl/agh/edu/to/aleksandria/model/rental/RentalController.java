@@ -37,36 +37,67 @@ public class RentalController {
     // GET /rentals/all
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getAllRentals() {
-        return rentalService.getAllRentals();
+    public ResponseEntity<Object> getAllRentals() {
+        return this.optionalToResponseEntity(
+                rentalService.getAllRentals(),
+                HttpStatus.NOT_FOUND,
+                "No rentals found"
+        );
     }
 
     // GET /rentals/search/by_user?user_id=
     @GetMapping("/search/by_user")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByUser(@RequestParam long user_id) {
-        return rentalService.getRentalsByUser(user_id);
+    public ResponseEntity<Object> getRentalsByUser(@RequestParam long user_id) {
+        return this.optionalToResponseEntity(
+                rentalService.getRentalsByUser(user_id),
+                HttpStatus.NOT_FOUND,
+                "No rentals for this user ID found"
+        );
     }
 
     // GET /rentals/search/by_book?book_id=
     @GetMapping("/search/by_book")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByBook(@RequestParam long book_id) {
-        return rentalService.getRentalsByBook(book_id);
+    public ResponseEntity<Object> getRentalsByBook(@RequestParam long book_id) {
+        return this.optionalToResponseEntity(
+                rentalService.getRentalsByBook(book_id),
+                HttpStatus.NOT_FOUND,
+                "No rentals for this book ID found"
+        );
+    }
+
+    // GET /rentals/search/by_title?title_id=
+    @GetMapping("/search/by_title")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ResponseEntity<Object> getRentalsByTitle(@RequestParam long title_id) {
+        return this.optionalToResponseEntity(
+                rentalService.getRentalsByTitle(title_id),
+                HttpStatus.NOT_FOUND,
+                "No rentals for this title ID found"
+        );
     }
 
     // GET /rentals/search/by_date_range?start_date=&end_date=
     @GetMapping("/search/by_date_range")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByDateRange(@RequestParam LocalDate start_date, @RequestParam LocalDate end_date) {
-        return rentalService.getRentalsByDateRange(start_date, end_date);
+    public ResponseEntity<Object> getRentalsByDateRange(@RequestParam LocalDate start_date, @RequestParam LocalDate end_date) {
+        return this.optionalToResponseEntity(
+                rentalService.getRentalsByDateRange(start_date, end_date),
+                HttpStatus.NOT_FOUND,
+                "No rentals in this date range found"
+        );
     }
 
     // GET /rentals/search/by_date?date=
     @GetMapping("/search/by_date")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByDate(@RequestParam LocalDate date) {
-        return rentalService.getRentalsByDateRange(date, date);
+    public ResponseEntity<Object> getRentalsByDate(@RequestParam LocalDate date) {
+        return this.optionalToResponseEntity(
+                rentalService.getRentalsByDateRange(date, date),
+                HttpStatus.NOT_FOUND,
+                "No rentals on this date found"
+        );
     }
 
     // TODO more endpoints as needed
@@ -111,6 +142,14 @@ public class RentalController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Could not delete rental with given id"));
+        }
+    }
+
+    private <T> ResponseEntity<Object> optionalToResponseEntity(List<T> list, HttpStatus httpStatus, String s) {
+        if (list.isEmpty()) {
+            return new ResponseEntity<>(s, httpStatus);
+        } else {
+            return new ResponseEntity<>(list, HttpStatus.OK);
         }
     }
 

@@ -93,9 +93,8 @@ public class RentalService {
         if (rental.isEmpty() || rental.get().getReturnedOn() != null) {
             return Optional.empty();
         }
-
         rental.get().setReturnedOn(LocalDate.now());
-        bookService.changeAvailability(rental.get().getBook().getItemId(), true);
+        bookService.changeAvailability(rental.get().getBook().getItemId(), true); // make the book available again
         double fee = calculateFee(rental.get(), 2.5); // eventually should be configurable
         rental.get().setFee(fee);
         return Optional.of(rentalRepository.save(rental.get()));

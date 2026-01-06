@@ -11,4 +11,6 @@ public interface QueueRepository extends JpaRepository<QueueEntry, Integer> {
     boolean existsByUserAndTitle(User user, Title title);
 
     List<QueueEntry> findAllByTitle(Title title);
+
+    List<QueueEntry> findAllByUser_Id(long userId);
 }

@@ -18,11 +18,10 @@ public class QueueController {
 
     private final QueueService queueService;
 
-    // TODO: get all queues for user
     // TODO: consider adding pagination for queues
 
-    // GET /queue?title_id=
-    @GetMapping("/queue")
+    // GET /queue/search?title_id=
+    @GetMapping(path="/search", params="title_id")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> getQueue(@RequestParam Integer title_id) {
         return this.optionalToResponseEntity(
@@ -32,8 +31,19 @@ public class QueueController {
         );
     }
 
+    // GET /queue/search?user_id=
+    @GetMapping(path="/search", params="user_id")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN') or #user_id == principal.id")
+    public ResponseEntity<Object> getQueuesForUser(@RequestParam long user_id) {
+        return this.optionalToResponseEntity(
+                queueService.getAllUserQueueEntries(user_id),
+                HttpStatus.NOT_FOUND,
+                "No queues for this user ID found"
+        );
+    }
+
     // GET /queue/position?title_id=&user_id=
-    @GetMapping("/queue/position")
+    @GetMapping("/position")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN') or #user_id == principal.id")
     public int getUserPositionInQueue(@RequestParam Integer title_id, @RequestParam Integer user_id) {
         return queueService.getPositionInQueue(user_id, title_id);
@@ -61,11 +71,11 @@ public class QueueController {
         }
     }
 
-    private ResponseEntity<Object> optionalToResponseEntity(List<User> usersWaitingForTitle, HttpStatus httpStatus, String s) {
-        if (usersWaitingForTitle.isEmpty()) {
+    private <T> ResponseEntity<Object> optionalToResponseEntity(List<T> list, HttpStatus httpStatus, String s) {
+        if (list.isEmpty()) {
             return new ResponseEntity<>(s, httpStatus);
         } else {
-            return new ResponseEntity<>(usersWaitingForTitle, HttpStatus.OK);
+            return new ResponseEntity<>(list, HttpStatus.OK);
         }
     }
 
