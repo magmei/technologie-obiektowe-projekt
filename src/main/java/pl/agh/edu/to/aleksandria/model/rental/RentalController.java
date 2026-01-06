@@ -26,7 +26,7 @@ public class RentalController {
     // GET /rentals/search/by_id?id=
     @GetMapping("/search/by_id")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public ResponseEntity<Object> getRentalById(@RequestParam Integer id) {
+    public ResponseEntity<Object> getRentalById(@RequestParam int id) {
         return this.optionalToResponseEntity(
                 rentalService.getRentalById(id),
                 HttpStatus.NOT_FOUND,
@@ -44,14 +44,14 @@ public class RentalController {
     // GET /rentals/search/by_user?user_id=
     @GetMapping("/search/by_user")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByUser(@RequestParam Long user_id) {
+    public List<Rental> getRentalsByUser(@RequestParam long user_id) {
         return rentalService.getRentalsByUser(user_id);
     }
 
     // GET /rentals/search/by_book?book_id=
     @GetMapping("/search/by_book")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public List<Rental> getRentalsByBook(@RequestParam Long book_id) {
+    public List<Rental> getRentalsByBook(@RequestParam long book_id) {
         return rentalService.getRentalsByBook(book_id);
     }
 
@@ -89,7 +89,7 @@ public class RentalController {
     // POST /rentals/return?rental_id=
     @PostMapping("/return")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public ResponseEntity<Object> returnRental(@RequestParam Integer rental_id) {
+    public ResponseEntity<Object> returnRental(@RequestParam int rental_id) {
         return this.optionalToResponseEntity(
                 rentalService.returnRental(rental_id),
                 HttpStatus.BAD_REQUEST,
@@ -104,7 +104,7 @@ public class RentalController {
     // DELETE /rentals/delete?id=
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public ResponseEntity<Object> deleteRental(@RequestParam Integer id) {
+    public ResponseEntity<Object> deleteRental(@RequestParam int id) {
         boolean deleted = rentalService.deleteRental(id);
         if (deleted) {
             return ResponseEntity.ok().build();

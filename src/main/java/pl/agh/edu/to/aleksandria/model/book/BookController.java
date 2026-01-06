@@ -61,7 +61,7 @@ public class BookController {
     }
 
     // PUT /books/change_availability?id=?available=
-    @PutMapping("/update_availability")
+    @PutMapping("/change_availability")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> changeAvailability(@RequestParam Integer id, @RequestParam boolean availability) {
         return this.optionalToResponseEntity(

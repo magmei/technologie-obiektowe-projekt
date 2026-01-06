@@ -37,6 +37,10 @@ public class Rental {
     @Setter
     private LocalDate returnedOn;
 
+    @Getter
+    @Setter
+    private double fee;
+
     public Rental(User user, Book book, LocalDate rentedOn, LocalDate due, LocalDate returnedOn) {
         this.user = user;
         this.book = book;
@@ -59,6 +63,7 @@ public class Rental {
                 ", rentedOn=" + rentedOn +
                 ", due=" + due +
                 ", returnedOn=" + returnedOn +
+                ", fee=" + fee +
                 '}';
     }
 }

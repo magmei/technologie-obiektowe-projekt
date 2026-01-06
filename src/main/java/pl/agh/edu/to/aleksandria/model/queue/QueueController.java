@@ -18,6 +18,9 @@ public class QueueController {
 
     private final QueueService queueService;
 
+    // TODO: get all queues for user
+    // TODO: consider adding pagination for queues
+
     // GET /queue?title_id=
     @GetMapping("/queue")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")

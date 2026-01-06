@@ -33,6 +33,8 @@ public class QueueService {
         System.out.println("Queue service destroyed");
     }
 
+    // TODO: all queues per user
+
     public List<User> getUsersWaitingForTitle(int titleId) {
         Optional<Title> titleOpt = titleService.getTitleById(titleId);
         if (titleOpt.isEmpty()) {

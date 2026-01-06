@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookService;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
-import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.user.User;
 import pl.agh.edu.to.aleksandria.model.user.UserService;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,24 +33,32 @@ public class RentalService {
         System.out.println("Rental service destroyed");
     }
 
+
+    private double calculateFee(Rental rental, Double dailyRate) {
+        long daysLate = ChronoUnit.DAYS.between(rental.getDue(), rental.getReturnedOn());
+        if (daysLate > 0) {
+            return daysLate * dailyRate;
+        }
+        return 0.0;
+    }
+
     public List<Rental> getAllRentals() {
         return rentalRepository.findAll();
     }
 
-    public List<Rental> getRentalsByBook(Long bookId) {
+    public List<Rental> getRentalsByBook(long bookId) {
         return rentalRepository.findByBook_ItemId(bookId);
     }
 
-    public List<Rental> getRentalsByTitle(Title title) {
-        return null;
-        // TODO
+    public List<Rental> getRentalsByTitle(long titleId) {
+        return rentalRepository.findByBook_Title_Id(titleId);
     }
 
     public Optional<Rental> getRentalById(Integer id) {
         return Optional.ofNullable(rentalRepository.findById(id).orElse(null));
     }
 
-    public List<Rental> getRentalsByUser(Long userId) {
+    public List<Rental> getRentalsByUser(long userId) {
         return rentalRepository.findByUser_Id(userId);
     }
 
@@ -80,7 +88,7 @@ public class RentalService {
         return Optional.of(rentalRepository.save(rental));
     }
 
-    public Optional<Rental> returnRental(Integer rentalId) {
+    public Optional<Rental> returnRental(int rentalId) {
         Optional<Rental> rental = rentalRepository.findById(rentalId);
         if (rental.isEmpty() || rental.get().getReturnedOn() != null) {
             return Optional.empty();
@@ -88,10 +96,12 @@ public class RentalService {
 
         rental.get().setReturnedOn(LocalDate.now());
         bookService.changeAvailability(rental.get().getBook().getItemId(), true);
+        double fee = calculateFee(rental.get(), 2.5); // eventually should be configurable
+        rental.get().setFee(fee);
         return Optional.of(rentalRepository.save(rental.get()));
     }
 
-    public boolean deleteRental(Integer id) {
+    public boolean deleteRental(int id) {
         Optional<Rental> rental = rentalRepository.findById(id);
         if (rental.isEmpty()) {
             return false;

@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface RentalRepository extends JpaRepository<Rental, Integer> {
 
-    List<Rental> findByUser_Id(Long user_id);
+    List<Rental> findByUser_Id(long user_id);
 
-    List<Rental> findByBook_ItemId(Long bookId);
+    List<Rental> findByBook_ItemId(long bookId);
+
+    List<Rental> findByBook_Title_Id(long titleId);
 }
