@@ -1,5 +1,6 @@
 package pl.agh.edu.to.aleksandria.model.genre;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -23,6 +24,7 @@ public class Genre {
     @Setter
     private String name;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "genres")
     private List<Title> titles;
 

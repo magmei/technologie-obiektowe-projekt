@@ -4,8 +4,10 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.agh.edu.to.aleksandria.model.genre.dtos.UpdateGenreRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
+import pl.agh.edu.to.aleksandria.model.title.TitleRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class GenreService {
 
     private final GenreRepository genreRepository;
+    private final TitleRepository titleRepository;
 
     @PostConstruct
     public void onServiceStarted() {
@@ -49,6 +52,7 @@ public class GenreService {
         return Optional.of(genreRepository.save(genre));
     }
 
+    @Transactional
     public Optional<Genre> updateGenre(UpdateGenreRequest updateGenreRequest) {
         Optional<Genre> genre = genreRepository.findById(updateGenreRequest.getGenreId());
         if (genre.isEmpty()) {
@@ -57,25 +61,41 @@ public class GenreService {
 
         Genre updatedGenre = genre.get();
 
-        if (!Objects.equals(updatedGenre.getName(), updateGenreRequest.getGenreName())) {
-            updatedGenre.setName(updateGenreRequest.getGenreName());
+        List<Title> titlesToAdd = titleRepository.findAllById(updateGenreRequest.getTitlesToAdd());
+        List<Title> titlesToDelete = titleRepository.findAllById(updateGenreRequest.getTitlesToDelete());
+
+        if (titlesToAdd.size() < updateGenreRequest.getTitlesToAdd().size() ||
+            titlesToDelete.size() < updateGenreRequest.getTitlesToDelete().size()) {
+            return Optional.empty();
         }
 
-        for (Title new_title : updateGenreRequest.getTitlesToAdd()) {
+        updatedGenre.setName(updateGenreRequest.getGenreName());
+
+        for (Title new_title : titlesToAdd) {
             updatedGenre.addTitle(new_title);
+            new_title.addGenre(updatedGenre);
         }
 
-        for (Title old_title : updateGenreRequest.getTitlesToDelete()) {
+        for (Title old_title : titlesToDelete) {
             updatedGenre.removeTitle(old_title);
+            old_title.removeGenre(updatedGenre);
         }
 
-        return Optional.of(genreRepository.save(updatedGenre));
+        return Optional.of(updatedGenre);
     }
 
+    @Transactional
     public boolean deleteGenre(Integer id) {
-        Optional<Genre> genre = genreRepository.findById(id);
-        if (genre.isEmpty()) {
+        Optional<Genre> genre_opt = genreRepository.findById(id);
+        if (genre_opt.isEmpty()) {
             return false;
+        }
+
+        Genre genre = genre_opt.get();
+
+        for (Title title : genre.getTitles()) {
+            title.removeGenre(genre);
+            genre.removeTitle(title);
         }
 
         genreRepository.deleteById(id);

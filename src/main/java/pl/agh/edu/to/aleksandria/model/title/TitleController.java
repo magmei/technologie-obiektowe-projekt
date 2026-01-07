@@ -74,7 +74,7 @@ public class TitleController {
     }
 
     // PUT /titles/update
-    @PostMapping("/update")
+    @PutMapping("/update")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> updateTitle(@RequestBody UpdateTitleRequest request) {
         return this.optionalToResponseEntity(
@@ -85,7 +85,7 @@ public class TitleController {
     }
 
     // DELETE /titles/delete?id=
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> deleteTitle(@RequestParam Integer id) {
         boolean deleted = titleService.deleteTitle(id);

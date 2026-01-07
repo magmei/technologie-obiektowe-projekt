@@ -15,6 +15,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer itemId;
 
+    @Getter
     @ManyToOne
     private Title title;
 

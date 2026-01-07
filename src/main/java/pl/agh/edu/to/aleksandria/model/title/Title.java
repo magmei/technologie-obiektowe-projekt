@@ -25,6 +25,7 @@ public class Title {
     @Setter
     private String author;
 
+    @Getter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Title_Genres",

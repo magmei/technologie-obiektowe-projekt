@@ -13,5 +13,5 @@ import java.util.List;
 public class CreateTitleRequest {
     private String titleName;
     private String author;
-    private List<Genre> genres;
+    private List<Integer> genres;
 }

@@ -14,6 +14,6 @@ public class UpdateTitleRequest {
     private Integer id;
     private String titleName;
     private String author;
-    private List<Genre> genresToAdd;
-    private List<Genre> genresToRemove;
+    private List<Integer> genresToAdd;
+    private List<Integer> genresToDelete;
 }

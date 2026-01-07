@@ -35,7 +35,7 @@ public class BookController {
         );
     }
 
-    // GET /books/search/by_availability?available=
+    // GET /books/search/by_availability?availability=
     @GetMapping("/search/by_availability")
     @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public List<Book> getBooksByAvailability(@RequestParam Boolean availability) {
@@ -60,10 +60,10 @@ public class BookController {
         );
     }
 
-    // PUT /books/change_availability?id=?available=
-    @PutMapping("/change_availability")
+    // PUT /books/update_availability?id=&availability=
+    @PutMapping("/update_availability")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public ResponseEntity<Object> changeAvailability(@RequestParam Integer id, @RequestParam boolean availability) {
+    public ResponseEntity<Object> updateAvailability(@RequestParam Integer id, @RequestParam Boolean availability) {
         return this.optionalToResponseEntity(
                 bookService.changeAvailability(id, availability),
                 HttpStatus.BAD_REQUEST,
