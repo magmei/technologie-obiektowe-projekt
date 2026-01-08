@@ -3,6 +3,7 @@ package pl.agh.edu.to.aleksandria.notifications;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
 import pl.agh.edu.to.aleksandria.model.rental.Rental;
 
 @Service
@@ -43,6 +44,22 @@ public class MailService {
                 rental.getUser().getEmail(),
                 MailGenerator.getRentalReturnedMailSubject(rental.getBook()),
                 MailGenerator.getRentalReturnedMailMessage(rental.getUser(), rental.getBook(), rental)
+        );
+    }
+
+    public void sendOnQueueJoinedEmail(QueueEntry queueEntry) {
+        this.sendEmail(
+                queueEntry.getUser().getEmail(),
+                MailGenerator.getQueueJoinedMailSubject(queueEntry),
+                MailGenerator.getQueueJoinedMailMessage(queueEntry.getUser(), queueEntry)
+        );
+    }
+
+    public void sendOnQueueLeftEmail(QueueEntry queueEntry) {
+        this.sendEmail(
+                queueEntry.getUser().getEmail(),
+                MailGenerator.getQueueLeftMailSubject(queueEntry),
+                MailGenerator.getQueueLeftMailMessage(queueEntry.getUser(), queueEntry)
         );
     }
 

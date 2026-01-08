@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import pl.agh.edu.to.aleksandria.model.book.Book;
+import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
 import pl.agh.edu.to.aleksandria.model.rental.Rental;
 import pl.agh.edu.to.aleksandria.model.user.User;
 
@@ -26,6 +27,14 @@ public class MailGenerator {
 
     public static String getRentalReturnedMailSubject(Book book) {
         return "Return of " + book.getTitle().getTitleName() + " confirmed.";
+    }
+
+    public static String getQueueJoinedMailSubject(QueueEntry queueEntry) {
+        return "You've been added to the waiting list for " + queueEntry.getTitle().getTitleName() + ".";
+    }
+
+    public static String getQueueLeftMailSubject(QueueEntry queueEntry) {
+        return "You've left waiting list for " + queueEntry.getTitle().getTitleName() + ".";
     }
 
     public static String getOnRentalMailMessage(User user, Book book, Rental rental) {
@@ -54,5 +63,17 @@ public class MailGenerator {
                                           rental.getFee() + " PLN was charged.\n" : "";
 
         return response;
+    }
+
+    public static String getQueueJoinedMailMessage(User user, QueueEntry queueEntry) {
+        return "Hello " + user.getFirstName() + ",\n" +
+               "As we've no " + queueEntry.getTitle().getTitleName() + " left, you've been added to the waiting " +
+               "list for this title. We'll inform you as soon as any volume will become available.";
+    }
+
+    public static String getQueueLeftMailMessage(User user, QueueEntry queueEntry) {
+        return "Hello " + user.getFirstName() + ",\n" +
+               "Title you've been waiting for has become available. You are removed from the waiting list, please " +
+               "come to the library and pick up your volume.";
     }
 }

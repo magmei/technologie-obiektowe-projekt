@@ -4,11 +4,13 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.agh.edu.to.aleksandria.model.queue.dtos.QueueRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.title.TitleService;
 import pl.agh.edu.to.aleksandria.model.user.User;
 import pl.agh.edu.to.aleksandria.model.user.UserService;
+import pl.agh.edu.to.aleksandria.notifications.MailService;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class QueueService {
 
+    private final MailService mailService;
     QueueRepository queueRepository;
     UserService userService;
     TitleService titleService;
@@ -47,6 +50,7 @@ public class QueueService {
         return entries.stream().map(QueueEntry::getUser).toList();
     }
 
+    @Transactional
     public Optional<QueueEntry> addUserToQueue(QueueRequest queueRequest) {
         int userId = queueRequest.getUserId();
         int titleId = queueRequest.getTitleId();
@@ -65,6 +69,8 @@ public class QueueService {
         }
 
         QueueEntry entry = new QueueEntry(userOpt.get(), titleOpt.get(), LocalDateTime.now());
+
+        mailService.sendOnQueueJoinedEmail(entry);
 
         return Optional.of(queueRepository.save(entry));
     }
@@ -93,6 +99,7 @@ public class QueueService {
         return -1;
     }
 
+    @Transactional
     public boolean removeUserFromQueue(QueueRequest request) {
         int userId = request.getUserId();
         int titleId = request.getTitleId();
@@ -109,6 +116,7 @@ public class QueueService {
         for (QueueEntry entry : allEntries) {
             if (entry.getUser().getId().equals(userOpt.get().getId())) {
                 queueRepository.delete(entry);
+                mailService.sendOnQueueLeftEmail(entry);
                 return true;
             }
         }

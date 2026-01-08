@@ -25,6 +25,7 @@ public class QueueEntry {
     @Setter
     private User user;
 
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TITLE_ID")
     private Title title;
