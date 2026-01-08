@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookService;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
@@ -87,11 +88,12 @@ public class RentalService {
         Rental rental = new Rental(user.get(), book.get(), LocalDate.now(), LocalDate.now().plusDays(request.getRentalDays()), null);
         bookService.changeAvailability(book.get().getItemId(), false);
 
-        mailService.sendOnRentalEmail(user.get(), book.get(), rental);
+        mailService.sendOnRentalEmail(rental);
 
         return Optional.of(rentalRepository.save(rental));
     }
 
+    @Transactional
     public Optional<Rental> returnRental(int rentalId) {
         Optional<Rental> rental = rentalRepository.findById(rentalId);
         if (rental.isEmpty() || rental.get().getReturnedOn() != null) {
@@ -101,6 +103,9 @@ public class RentalService {
         bookService.changeAvailability(rental.get().getBook().getItemId(), true); // make the book available again
         double fee = calculateFee(rental.get(), 2.5); // eventually should be configurable
         rental.get().setFee(fee);
+
+        mailService.sendOnRentalReturnedEmail(rental.get());
+
         return Optional.of(rentalRepository.save(rental.get()));
     }
 

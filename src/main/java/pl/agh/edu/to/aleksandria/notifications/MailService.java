@@ -3,9 +3,7 @@ package pl.agh.edu.to.aleksandria.notifications;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.rental.Rental;
-import pl.agh.edu.to.aleksandria.model.user.User;
 
 @Service
 public class MailService {
@@ -16,33 +14,41 @@ public class MailService {
         this.mailSender = mailSender;
     }
 
-    public void sendOnRentalEmail(User user, Book book, Rental rental) {
+    public void sendOnRentalEmail(Rental rental) {
         this.sendEmail(
-                user.getEmail(),
-                MailGenerator.getOnRentalMailSubject(book),
-                MailGenerator.getOnRentalMailMessage(user, book, rental)
+                rental.getUser().getEmail(),
+                MailGenerator.getOnRentalMailSubject(rental.getBook()),
+                MailGenerator.getOnRentalMailMessage(rental.getUser(), rental.getBook(), rental)
         );
     }
 
-    public void sendOnRentalSoonEndEmail(User user, Book book, Rental rental) {
+    public void sendOnRentalSoonEndEmail(Rental rental) {
         this.sendEmail(
-                user.getEmail(),
-                MailGenerator.getRentalSoonEndMailSubject(book, rental),
-                MailGenerator.getRentalSoonEndMailMessage(user, book, rental)
+                rental.getUser().getEmail(),
+                MailGenerator.getRentalSoonEndMailSubject(rental.getBook(), rental),
+                MailGenerator.getRentalSoonEndMailMessage(rental.getUser(), rental.getBook(), rental)
         );
     }
 
-    public void sendOnRentalPastDueEmail(User user, Book book, Rental rental) {
+    public void sendOnRentalPastDueEmail(Rental rental) {
         this.sendEmail(
-                user.getEmail(),
-                MailGenerator.getRentalPastDueMailSubject(book),
-                MailGenerator.getRentalPastDueMailMessage(user, book)
+                rental.getUser().getEmail(),
+                MailGenerator.getRentalPastDueMailSubject(rental.getBook()),
+                MailGenerator.getRentalPastDueMailMessage(rental.getUser(), rental.getBook())
+        );
+    }
+
+    public void sendOnRentalReturnedEmail(Rental rental) {
+        this.sendEmail(
+                rental.getUser().getEmail(),
+                MailGenerator.getRentalReturnedMailSubject(rental.getBook()),
+                MailGenerator.getRentalReturnedMailMessage(rental.getUser(), rental.getBook(), rental)
         );
     }
 
     private void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
+        message.setTo("adsuliga@student.agh.edu.pl");
         message.setSubject(subject);
         message.setText(text);
         mailSender.send(message);

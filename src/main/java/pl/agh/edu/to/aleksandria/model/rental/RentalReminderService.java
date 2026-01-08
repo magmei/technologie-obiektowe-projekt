@@ -22,7 +22,7 @@ public class RentalReminderService {
         List<Rental> rentalsDueSoon = rentalRepository.findByDueAndReturnedOnIsNull(reminderDate);
 
         for (Rental rental : rentalsDueSoon) {
-            mailService.sendOnRentalSoonEndEmail(rental.getUser(), rental.getBook(), rental);
+            mailService.sendOnRentalSoonEndEmail(rental);
         }
     }
 
@@ -33,7 +33,7 @@ public class RentalReminderService {
         List<Rental> rentalsPastDue = rentalRepository.findByDueAndReturnedOnIsNull(reminderDate);
 
         for (Rental rental : rentalsPastDue) {
-            mailService.sendOnRentalPastDueEmail(rental.getUser(), rental.getBook(), rental);
+            mailService.sendOnRentalPastDueEmail(rental);
         }
     }
 
