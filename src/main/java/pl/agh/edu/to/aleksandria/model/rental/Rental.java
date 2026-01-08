@@ -18,6 +18,7 @@ public class Rental {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 

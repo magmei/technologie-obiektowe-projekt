@@ -9,6 +9,7 @@ import pl.agh.edu.to.aleksandria.model.book.BookService;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
 import pl.agh.edu.to.aleksandria.model.user.User;
 import pl.agh.edu.to.aleksandria.model.user.UserService;
+import pl.agh.edu.to.aleksandria.notifications.MailService;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +23,7 @@ public class RentalService {
     private final RentalRepository rentalRepository;
     private final UserService userService;
     private final BookService bookService;
+    private final MailService mailService;
 
     @PostConstruct
     public void onServiceStarted() {
@@ -84,6 +86,8 @@ public class RentalService {
 
         Rental rental = new Rental(user.get(), book.get(), LocalDate.now(), LocalDate.now().plusDays(request.getRentalDays()), null);
         bookService.changeAvailability(book.get().getItemId(), false);
+
+        mailService.sendOnRentalEmail(user.get(), book.get(), rental);
 
         return Optional.of(rentalRepository.save(rental));
     }
