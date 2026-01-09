@@ -65,7 +65,7 @@ public class MailService {
 
     private void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("adsuliga@student.agh.edu.pl");
+        message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
         mailSender.send(message);
