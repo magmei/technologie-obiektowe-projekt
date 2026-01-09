@@ -41,7 +41,7 @@ System opiera się na relacyjnym modelu danych z następującymi kluczowymi klas
 
 ### Model bazy danych
 
-<img width="1159" height="653" alt="Zrzut ekranu 2025-12-9 o 13 20 59" src="https://github.com/user-attachments/assets/ae569fe7-2dcf-4349-a97c-e0353bf45387" />
+<img width="1640" height="1007" alt="Aleksandria" src="https://github.com/user-attachments/assets/3fd4af19-1a37-40a0-bed9-690c81f541ea" />
 
 
 ## 4. Bezpieczeństwo
