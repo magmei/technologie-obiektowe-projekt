@@ -3,9 +3,7 @@
 ## 1. Opis projektu
 **Aleksandria** to system backendowy do zarządzania biblioteką, zaimplementowany w architekturze REST. Aplikacja umożliwia zarządzanie cyklem życia książek, użytkowników oraz procesem wypożyczania. Kluczowym elementem systemu jest zaawansowany moduł bezpieczeństwa oparty na tokenach JWT oraz dynamicznej kontroli dostępu (RBAC) z uwzględnieniem hierarchii ról.
 
-## 2. Stos technologiczny
-
-Projekt wykorzystuje następujące technologie i biblioteki:
+## 2. Wykorzystane technologie
 
 * **Język:** Java 25
 * **Framework:** Spring Boot 4.0.0
@@ -145,11 +143,12 @@ Poniższa tabela przedstawia dostępne endpointy oraz wymagane uprawnienia.
 | DELETE | `/rentals/delete` | `?id=` | Usunięcie rekordu wypożyczenia | LIBRARIAN, ADMIN |
 
 ### Recenzje (`/reviews`)
-| Metoda | Ścieżka | Parametry | Opis | Uprawnienia |
-| :--- | :--- | :--- | :--- | :--- |
-| GET | `/reviews/byTitle` | `?titleId=` | Pobranie recenzji dla tytułu | Zalogowany |
-| POST | `/reviews/create` | Body: `CreateReviewRequest` | Dodanie recenzji | READER |
-| DELETE | `/reviews/delete` | `?reviewId=` | Usunięcie recenzji | ADMIN |
+| Metoda | Ścieżka                      | Parametry | Opis | Uprawnienia |
+| :--- |:-----------------------------| :--- | :--- | :--- |
+| GET | `/reviews/byTitle`           | `?titleId=` | Pobranie recenzji dla tytułu | Zalogowany |
+| POST | `/reviews/create`            | Body: `CreateReviewRequest` | Dodanie recenzji | READER |
+| PUT | `/reviews/update/{reviewId}` | Body: `UpdateReviewRequest`| Zmiana recenzji | ADMIN, Właściciel |
+| DELETE | `/reviews/delete`            | `?reviewId=` | Usunięcie recenzji | ADMIN |
 
 ### Kolejka (`/queue`)
 | Metoda | Ścieżka | Parametry | Opis | Uprawnienia |

@@ -2,8 +2,11 @@ package pl.agh.edu.to.aleksandria.model.review;
 
 import org.springframework.stereotype.Service;
 import pl.agh.edu.to.aleksandria.model.review.dtos.CreateReviewRequest;
+import pl.agh.edu.to.aleksandria.model.review.dtos.UpdateReviewRequest;
+import pl.agh.edu.to.aleksandria.model.user.User;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -24,6 +27,26 @@ public class ReviewService {
 
         return Optional.of(reviewRepository.save(review));
     }
+
+    public Optional<Review> updateReview(UpdateReviewRequest request) {
+        Optional<Review> existingReview = reviewRepository.findById(request.getReviewId());
+        if (existingReview.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Review review = existingReview.get();
+
+        if (request.getReviewText() != null && !Objects.equals(request.getReviewText(), review.getReviewText())) {
+            review.setReviewText(request.getReviewText());
+        }
+
+        if (request.getRating() != null && !Objects.equals(request.getRating(), review.getRating())) {
+            review.setRating(request.getRating());
+        }
+
+        return Optional.of(reviewRepository.save(review));
+    }
+
 
     public boolean deleteReview(int reviewId) {
         Optional<Review> reviewToDelete = getReviewById(reviewId);

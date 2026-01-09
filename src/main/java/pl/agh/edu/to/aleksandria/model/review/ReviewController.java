@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.to.aleksandria.model.review.dtos.CreateReviewRequest;
+import pl.agh.edu.to.aleksandria.model.review.dtos.UpdateReviewRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 
 import java.util.List;
@@ -35,6 +36,18 @@ public class ReviewController {
                 "Could not create review"
         );
     }
+
+    @PutMapping("/update/{reviewId}")
+    @PreAuthorize("isAuthenticated() and (hasAnyRole('ADMIN') or @reviewSecurity.isOwner(#reviewId, authentication.principal.id))")
+    public ResponseEntity<Object> updateReview(@PathVariable int reviewId, @RequestBody UpdateReviewRequest request) {
+        request.setReviewId(reviewId);
+        return this.optionalToResponseEntity(
+                reviewService.updateReview(request),
+                HttpStatus.BAD_REQUEST,
+                "Failed to update the review"
+        );
+    }
+
 
     // DELETE /reviews/delete?reviewId=
     @DeleteMapping("/delete")

@@ -43,16 +43,10 @@ public class TestConfiguration {
         System.out.println("Books: " + bookRepository.findAll());
         System.out.println("User roles: " + roleRepository.findAll());
 
-        Optional<Rental> rentalOpt = rentalService.createRental(new CreateRentalRequest(1, 1, 14));
-        for (Rental rental : rentalRepository.findAll()) {
-            System.out.println("Rental: " + rental);
-        }
-        rentalService.returnRental(rentalOpt.get().getId());
         for (Rental rental : rentalRepository.findAll()) {
             System.out.println("Rental: " + rental);
         }
         System.out.println("Rentals for title 1: " + rentalService.getRentalsByTitle(1));
-        rentalService.deleteRental(rentalOpt.get().getId());
 
         queueService.addUserToQueue(new QueueRequest(1, 1));
         queueService.addUserToQueue(new QueueRequest(2, 1));
