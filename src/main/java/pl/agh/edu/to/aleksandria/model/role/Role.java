@@ -1,34 +1,28 @@
 package pl.agh.edu.to.aleksandria.model.role;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name="roles")
 public class Role {
+
     @Id
+    @Getter
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Getter
+    @Setter
     private String name;
-
-    public Role() {
-
-    }
 
     public Role(String name) {
         this.name = name;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override

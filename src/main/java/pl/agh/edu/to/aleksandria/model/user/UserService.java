@@ -2,6 +2,7 @@ package pl.agh.edu.to.aleksandria.model.user;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,17 +16,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @PostConstruct
     public void onServiceStarted() {
@@ -63,25 +59,25 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> createUser(CreateUserRequest request) {
-        // If role does not exist, do not register new user
+        // If a role does not exist, do not register a new user
         Optional<Role> userRole = roleRepository.findByName(request.getRoleName());
         if (userRole.isEmpty()) {
             return Optional.empty();
         }
 
-        // If user with this email already exist, do not register new user
+        // If a user with this email already exists, do not register a new user
         Optional<User> user = getUserByEmail(request.getEmail());
         if (user.isPresent()) {
             return Optional.empty();
         }
 
-        // Register new one
+        // Register a new one
         User newUser = new User(request.getFirstName(), request.getLastName(), request.getAddress(), request.getEmail(), passwordEncoder.encode(request.getPassword()), userRole.get());
         return Optional.of(userRepository.save(newUser));
     }
 
     public Optional<User> updateUser(UpdateUserRequest request) {
-        // If user does not exist, do not update anything
+        // If a user does not exist, do not update anything
         Optional<User> savedUser = userRepository.findById(request.getId());
         if (savedUser.isEmpty()) {
             return Optional.empty();
@@ -102,7 +98,7 @@ public class UserService implements UserDetailsService {
         }
 
         if (request.getEmail() != null && !Objects.equals(request.getEmail(), user.getEmail())) {
-            // If there is some user with email we want to set, abort
+            // If there is some user with email, we want to set, abort
             Optional<User> userWithNewEmail = userRepository.findByEmail(request.getEmail());
             if (userWithNewEmail.isPresent()) {
                 return Optional.empty();

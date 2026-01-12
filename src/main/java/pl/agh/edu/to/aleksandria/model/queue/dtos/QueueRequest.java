@@ -1,0 +1,13 @@
+package pl.agh.edu.to.aleksandria.model.queue.dtos;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class QueueRequest {
+    private int userId;
+    private int titleId;
+}
