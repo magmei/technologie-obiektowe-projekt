@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>User Profile</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<div class="container">
+  <a th:href="@{/}" class="back-link">&larr; Back to Catalog</a>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2>My Profile</h2>
+      <span class="badge" th:classappend="'role-' + ${user.role.name}" th:text="${user.role.name}">ROLE</span>
+    </div>
+    <div class="info-grid">
+      <span class="label">Full Name:</span>
+      <span th:text="${user.firstName} + ' ' + ${user.lastName}">John Doe</span>
+      <span class="label">Email:</span>
+      <span th:text="${user.email}">john@example.com</span>
+      <span class="label">User ID:</span>
+      <span th:text="${user.id}">123</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>My Active Rentals</h3>
+
+    <div th:if="${rentals == null or rentals.empty}" class="text-muted">
+      <p>You have no books currently rented.</p>
+    </div>
+
+    <table th:if="${rentals != null and !rentals.empty}">
+      <thead>
+      <tr>
+        <th>Book Title</th>
+        <th>Rented On</th>
+        <th>Due Date</th>
+        <th>Status</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="rental : ${rentals}">
+        <td>
+          <a th:href="@{/titles/view/{id}(id=${rental.book.title.id})}"
+             th:text="${rental.book.title.titleName}"
+             class="link-title">Title</a>
+          <br/>
+          <small class="text-muted" th:text="'Copy ID: ' + ${rental.book.itemId}">ID</small>
+        </td>
+        <td th:text="${rental.rentedOn}">2023-01-01</td>
+        <td th:text="${rental.due}">2023-01-15</td>
+        <td>
+                         <span th:if="${rental.due.isBefore(#temporals.createToday())}"
+                               class="status-rented">OVERDUE</span>
+          <span th:unless="${rental.due.isBefore(#temporals.createToday())}"
+                class="status-avail">Active</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>My Queue Status</h3>
+
+    <div th:if="${queue == null or queue.empty}" class="text-muted">
+      <p>You are not waiting for any books.</p>
+    </div>
+
+    <table th:if="${queue != null and !queue.empty}">
+      <thead>
+      <tr>
+        <th>Book Title</th>
+        <th>Requested On</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="entry : ${queue}">
+        <td>
+          <a th:href="@{/titles/view/{id}(id=${entry.title.id})}"
+             th:text="${entry.title.titleName}"
+             class="link-title">Title</a>
+        </td>
+        <td th:text="${#temporals.format(entry.requestDate, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+        <td>
+          <form th:action="@{/queue/leave}" method="post" style="display:inline;" onsubmit="return confirm('Leave queue?');">
+            <input type="hidden" name="titleId" th:value="${entry.title.id}" />
+            <button type="submit" class="btn btn-danger btn-sm">Leave Queue</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" th:if="${user.role.name == 'LIBRARIAN' or user.role.name == 'ADMIN'}">
+    <h2 style="color: #1b5e20;">Librarian Console</h2>
+    <div class="actions-grid">
+      <a th:href="@{/rentals/all}" class="btn-action librarian-btn">Manage Rentals</a>
+      <a th:href="@{/users/all}" class="btn-action librarian-btn">Manage Users</a>
+      <a th:href="@{/genres/all}" class="btn-action librarian-btn">Manage Genres</a>
+    </div>
+  </div>
+
+  <div class="card" th:if="${user.role.name == 'ADMIN'}">
+    <h2 style="color: #b71c1c;">Administration</h2>
+    <div class="actions-grid">
+      <a th:href="@{/users/create}" class="btn-action admin-btn">Create Staff</a>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 20px;">
+    <a th:href="@{/logout}" class="btn logout-btn">Logout</a>
+  </div>
+</div>
+
+</body>
+</html>

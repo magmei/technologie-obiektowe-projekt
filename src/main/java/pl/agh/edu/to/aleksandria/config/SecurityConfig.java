@@ -29,6 +29,7 @@ public class SecurityConfig {
                 // configure paths which do not require authentication
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
                                 "/auth/**",
                                 "/login/**",
                                 "/v3/api-docs/**",
@@ -42,6 +43,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authProvider)
+                .logout(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

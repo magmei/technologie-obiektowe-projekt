@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <title th:text="${title.titleName}">Title Details</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header-section">
+    <div>
+      <h1 th:text="${title.titleName}">Title Name</h1>
+      <div class="meta">
+        Author: <strong th:text="${title.author}">Author</strong> |
+        Genres: <span th:each="g : ${title.genres}" class="genre-tag" th:text="${g.name}">Genre</span>
+      </div>
+    </div>
+    <div>
+      <a th:href="@{/}" class="btn btn-back">Back to Catalog</a>
+    </div>
+  </div>
+
+  <div class="admin-controls" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+    <strong style="display:block; margin-bottom:10px;">Title Management:</strong>
+
+    <button onclick="openEditModal()" class="btn btn-warning btn-sm">Edit Metadata</button>
+
+    <form th:action="@{/titles/delete}" method="post" style="display:inline;" onsubmit="return confirm('Delete this title and all its books?');">
+      <input type="hidden" name="id" th:value="${title.id}" />
+      <button type="submit" class="btn btn-delete">Delete Title</button>
+    </form>
+
+    <form th:action="@{/books/web/create}" method="post" style="display:inline; margin-left: 20px; border-left: 1px solid #ccc; padding-left: 20px;">
+      <input type="hidden" name="titleId" th:value="${title.id}" />
+      <button type="submit" class="btn btn-action" style="background-color: #28a745;">+ Add Physical Copy</button>
+    </form>
+  </div>
+
+  <div class="section">
+    <h3>Physical Copies</h3>
+
+    <div sec:authorize="hasRole('READER')">
+      <div th:if="${books != null and !books.empty}">
+        <p style="font-size: 1.1em;">
+          Library Holdings: <strong th:text="${books.size()}">10</strong> <br>
+          Currently Available:
+          <strong style="color: #28a745;"
+                  th:text="${books.?[available == true].size()}">5</strong>
+        </p>
+        <div th:if="${books.?[available == true].size() == 0}">
+          <p style="color: #dc3545; font-weight: bold;">All copies are currently rented.</p>
+        </div>
+      </div>
+      <p th:if="${books == null or books.empty}">No copies currently in the library system.</p>
+    </div>
+
+    <div sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">
+      <p th:if="${books == null or books.empty}">No physical copies in the library.</p>
+
+      <table th:if="${books != null and !books.empty}">
+        <thead>
+        <tr>
+          <th>Book ID</th>
+          <th>Status</th>
+          <th>Staff Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+          <td th:text="${book.itemId}">10</td>
+          <td>
+            <span th:if="${book.available}" class="status-avail">Available</span>
+            <span th:unless="${book.available}" class="status-rented">Rented / Unavailable</span>
+          </td>
+
+          <td>
+            <div th:if="${book.available}">
+              <form th:action="@{/rentals/web/create}" method="post" style="display:flex; gap:5px; align-items:center;">
+                <input type="hidden" name="bookId" th:value="${book.itemId}" />
+                <input type="hidden" name="titleId" th:value="${title.id}" />
+
+                <input type="number" name="userId" placeholder="User ID" required
+                       style="width: 80px; padding: 4px; border: 1px solid #ccc; border-radius: 4px;" />
+                <input type="number" name="rentalDays" value="14" style="width: 50px;" title="Days" />
+                <button type="submit" class="btn btn-primary btn-sm">Rent</button>
+              </form>
+            </div>
+
+            <div th:unless="${book.available}">
+              <span style="color: #666; font-size: 0.9em;">(Currently Rented)</span>
+            </div>
+          </td>
+          <td>
+            <form th:action="@{/books/delete}" method="post" style="display:inline; margin-left: 5px;" onsubmit="return confirm('Delete this copy?');">
+              <input type="hidden" name="id" th:value="${book.itemId}" />
+              <input type="hidden" name="titleId" th:value="${title.id}" />
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 25px;">
+    <h3>User Reviews</h3>
+
+    <div th:if="${reviews == null or reviews.empty}" class="text-muted">
+      <p>No reviews yet. Be the first to write one!</p>
+    </div>
+
+    <div th:each="review : ${reviews}" style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+      <div class="flex-between">
+        <div>
+                    <span style="color: #ffc107; font-size: 1.2rem;">
+                        <span th:if="${review.rating >= 1}">&#9733;</span><span th:if="${review.rating < 1}">&#9734;</span>
+                        <span th:if="${review.rating >= 2}">&#9733;</span><span th:if="${review.rating < 2}">&#9734;</span>
+                        <span th:if="${review.rating >= 3}">&#9733;</span><span th:if="${review.rating < 3}">&#9734;</span>
+                        <span th:if="${review.rating >= 4}">&#9733;</span><span th:if="${review.rating < 4}">&#9734;</span>
+                        <span th:if="${review.rating >= 5}">&#9733;</span><span th:if="${review.rating < 5}">&#9734;</span>
+                    </span>
+          <span class="text-muted" style="margin-left: 10px; font-size: 0.9em;"
+                th:text="'User #' + ${review.userId}">User #1</span>
+        </div>
+
+        <div th:if="${currentUser != null}">
+          <form th:action="@{/reviews/web/delete}" method="post"
+                th:if="${currentUser.role.name == 'ADMIN' or currentUser.id == review.userId}"
+                onsubmit="return confirm('Delete this review?');">
+            <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
+            <input type="hidden" name="titleId" th:value="${title.id}" />
+            <button type="submit" class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size: 0.8rem;">Delete</button>
+          </form>
+        </div>
+      </div>
+
+      <p style="margin: 8px 0 0 0; color: #333;" th:text="${review.reviewText}">Great book!</p>
+    </div>
+
+    <div sec:authorize="hasRole('READER')" class="mt-2" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
+      <h4 style="margin-top:0;">Write a Review</h4>
+      <form th:action="@{/reviews/web/add}" method="post">
+        <input type="hidden" name="titleId" th:value="${title.id}" />
+
+        <div class="form-group">
+          <label for="rating">Rating</label>
+          <select name="rating" id="rating" required style="width: 150px; padding: 5px;">
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Good</option>
+            <option value="3">3 - Average</option>
+            <option value="2">2 - Poor</option>
+            <option value="1">1 - Terrible</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="comment">Comment</label>
+          <textarea name="comment" id="comment" rows="3" placeholder="Share your thoughts..." required
+                    style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Post Review</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<div id="editTitleModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeEditModal()">&times;</span>
+
+    <h2>Edit Title Metadata</h2>
+
+    <form th:action="@{/titles/web/update}" method="post">
+      <input type="hidden" name="id" th:value="${title.id}" />
+
+      <div class="form-group">
+        <label for="editTitleName">Book Title</label>
+        <input type="text" id="editTitleName" name="titleName" th:value="${title.titleName}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="editAuthor">Author</label>
+        <input type="text" id="editAuthor" name="author" th:value="${title.author}" required />
+      </div>
+
+      <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;">
+        <label style="margin-bottom: 5px;">Manage Genres</label>
+
+        <div style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+          Current:
+          <span th:each="g : ${title.genres}"
+                th:text="${g.name} + ' (ID: ' + ${g.id} + ')'"
+                class="genre-tag"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="genreToAdd" style="font-size: 0.85rem;">Add Genre (ID)</label>
+          <input type="number" id="genreToAdd" name="genreToAdd" placeholder="e.g. 5" />
+        </div>
+
+        <div class="form-group">
+          <label for="genreToDelete" style="font-size: 0.85rem; color: #dc3545;">Remove Genre (ID)</label>
+          <input type="number" id="genreToDelete" name="genreToDelete" placeholder="e.g. 2" />
+        </div>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-warning" style="width: 100%;">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var editModal = document.getElementById("editTitleModal");
+
+  function openEditModal() {
+    editModal.style.display = "flex";
+  }
+
+  function closeEditModal() {
+    editModal.style.display = "none";
+  }
+
+  // Close if clicking outside the white box
+  window.onclick = function(event) {
+    if (event.target == editModal) {
+      closeEditModal();
+    }
+  }
+</script>
+
+</body>
+</html>
