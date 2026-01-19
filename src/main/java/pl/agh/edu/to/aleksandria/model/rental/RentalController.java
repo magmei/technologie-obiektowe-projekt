@@ -117,7 +117,7 @@ public class RentalController {
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> createRental(CreateRentalRequest request) {
-        if (rentalService.canCreateRental(request.getUserId(), request.getBookId())) {
+        if (rentalService.isRentalPossible(request.getUserId(), request.getBookId())) {
             return this.optionalToResponseEntity(
                     rentalService.createRental(request),
                     HttpStatus.BAD_REQUEST,

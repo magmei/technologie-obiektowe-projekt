@@ -87,8 +87,8 @@ public class RentalService {
                 .toList();
     }
 
-    public boolean canCreateRental(int userId, int bookId) {
-        // we allow creating rentals only if user/book exist, book is available and user has no overdue rentals
+    public boolean isRentalPossible(int userId, int bookId) {
+        // we allow creating/extending rentals only if user/book exist, book is available and user has no overdue rentals
         // in addition, if the title of the book has a queue, the count of available books of that title is the
         // max position in the queue for a user to be able to rent a book of that title
 
@@ -177,10 +177,16 @@ public class RentalService {
             throw new IllegalStateException("Cannot extend rental for user with overdue rentals");
         }
 
-        // if there is a queue for the title of the rented book, do not allow extension
+        // if there is a queue for the title of the rented book longer than there are available books, do not allow extension
         Title title = rental.get().getBook().getTitle();
-        if (!queueService.getUsersWaitingForTitle(title.getId()).isEmpty()) {
-            throw new IllegalStateException("Cannot extend rental when there is a queue for the title of the rented book");
+        List<User> queue = queueService.getUsersWaitingForTitle(title.getId());
+        if (!queue.isEmpty()) {
+            long availableBooksCount = bookService.getBooksByTitleId(title.getId()).stream()
+                    .filter(Book::isAvailable)
+                    .count();
+            if (queue.size() > availableBooksCount) { // if equal, the user extending the rental is the last one who can have the book
+                throw new IllegalStateException("Cannot extend rental when there is a queue for the title longer than there are books available");
+            }
         }
 
         // otherwise, extend the rental
