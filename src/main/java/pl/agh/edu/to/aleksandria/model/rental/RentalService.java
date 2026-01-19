@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookService;
+import pl.agh.edu.to.aleksandria.model.queue.QueueService;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
+import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.user.User;
 import pl.agh.edu.to.aleksandria.model.user.UserService;
 import pl.agh.edu.to.aleksandria.notifications.MailService;
@@ -25,6 +27,7 @@ public class RentalService {
     private final UserService userService;
     private final BookService bookService;
     private final MailService mailService;
+    private final QueueService queueService;
 
     @PostConstruct
     public void onServiceStarted() {
@@ -72,16 +75,59 @@ public class RentalService {
                 .toList();
     }
 
+    public boolean canCreateRental(int userId, int bookId) {
+        // we allow creating rentals only if user/book exist, book is available and user has no overdue rentals
+        // in addition, if the title of the book has a queue, the count of available books of that title is the
+        // max position in the queue for a user to be able to rent a book of that title
+
+        Optional<User> user = userService.getUserById(userId);
+        if (user.isEmpty()) {
+            return false;
+        }
+        Optional<Book> book = bookService.getBookById(bookId);
+        if (book.isEmpty() || !book.get().isAvailable()) {
+            return false;
+        }
+
+        Title title = book.get().getTitle();
+
+        List<Rental> userRentals = rentalRepository.findByUser_Id(userId);
+        for (Rental rental : userRentals) {
+            if (rental.getReturnedOn() == null && rental.getDue().isBefore(LocalDate.now())) {
+                return false; // user has an overdue rental
+            }
+        }
+
+        List<User> queue = queueService.getUsersWaitingForTitle(title.getId());
+        if (queue.isEmpty()) {
+            // no queue, rental can be created
+            return true;
+        } else {
+            // there is a queue, check user's position
+            int position = queueService.getPositionInQueue(userId, title.getId());
+            if (position == -1) {
+                return false; // user not in queue
+            }
+            long availableBooksCount = bookService.getBooksByTitleId(title.getId()).stream()
+                    .filter(Book::isAvailable)
+                    .count();
+            return position <= availableBooksCount; // user can rent only if their position is within available books
+        }
+    }
+
     public Optional<Rental> createRental(CreateRentalRequest request) {
         if (request.getRentalDays() <= 0) {
             return Optional.empty();
         }
+
+        // those checks are redundant if canCreateRental is used before calling this method (and it should always be)
+        // but the methods from service classes return Optionals
         Optional<User> user = userService.getUserById(request.getUserId());
         if (user.isEmpty()) {
             return Optional.empty();
         }
         Optional<Book> book = bookService.getBookById(request.getBookId());
-        if (book.isEmpty() || !book.get().isAvailable()) {
+        if (book.isEmpty()) {
             return Optional.empty();
         }
 
