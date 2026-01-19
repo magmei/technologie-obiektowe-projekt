@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.agh.edu.to.aleksandria.config.RentalConfig;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookService;
 import pl.agh.edu.to.aleksandria.model.queue.QueueService;
@@ -30,6 +31,8 @@ public class RentalService {
     private final BookService bookService;
     private final MailService mailService;
     private final QueueService queueService;
+
+    private final RentalConfig rentalConfig;
 
     @PostConstruct
     public void onServiceStarted() {
@@ -182,6 +185,10 @@ public class RentalService {
 
         // otherwise, extend the rental
         rental.get().setDue(rental.get().getDue().plusDays(extraDays));
+
+        // send notification email
+        mailService.sendOnRentalExtendedEmail(rental.get(), extraDays);
+
         return Optional.of(rentalRepository.save(rental.get()));
     }
 
@@ -193,7 +200,7 @@ public class RentalService {
         }
         rental.get().setReturnedOn(LocalDate.now());
         bookService.changeAvailability(rental.get().getBook().getItemId(), true); // make the book available again
-        double fee = calculateFee(rental.get(), 2.5); // eventually should be configurable
+        double fee = calculateFee(rental.get(), rentalConfig.getLateFee()); // eventually should be configurable
         rental.get().setFee(fee);
 
         mailService.sendOnRentalReturnedEmail(rental.get());
