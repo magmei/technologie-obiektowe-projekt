@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookService;
 import pl.agh.edu.to.aleksandria.model.queue.QueueService;
+import pl.agh.edu.to.aleksandria.model.queue.dtos.QueueRequest;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.user.User;
@@ -115,24 +116,35 @@ public class RentalService {
         }
     }
 
+    @Transactional
     public Optional<Rental> createRental(CreateRentalRequest request) {
         if (request.getRentalDays() <= 0) {
             return Optional.empty();
         }
 
+        int userId = request.getUserId();
+        int bookId = request.getBookId();
+
         // those checks are redundant if canCreateRental is used before calling this method (and it should always be)
         // but the methods from service classes return Optionals
-        Optional<User> user = userService.getUserById(request.getUserId());
+        Optional<User> user = userService.getUserById(userId);
         if (user.isEmpty()) {
             return Optional.empty();
         }
-        Optional<Book> book = bookService.getBookById(request.getBookId());
+        Optional<Book> book = bookService.getBookById(bookId);
         if (book.isEmpty()) {
             return Optional.empty();
         }
 
+        Title title = book.get().getTitle();
+
         Rental rental = new Rental(user.get(), book.get(), LocalDate.now(), LocalDate.now().plusDays(request.getRentalDays()), null);
         bookService.changeAvailability(book.get().getItemId(), false);
+
+        if (!queueService.getUsersWaitingForTitle(title.getId()).isEmpty()) {
+            // if there is a queue for the title of the rented book, remove the user from it
+            queueService.removeUserFromQueue(new QueueRequest(userId, title.getId()));
+        }
 
         mailService.sendOnRentalEmail(rental);
 
