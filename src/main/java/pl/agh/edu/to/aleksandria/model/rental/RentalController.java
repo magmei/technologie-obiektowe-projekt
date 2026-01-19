@@ -11,6 +11,7 @@ import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
 import pl.agh.edu.to.aleksandria.model.queue.QueueService;
 import pl.agh.edu.to.aleksandria.model.queue.dtos.QueueRequest;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
+import pl.agh.edu.to.aleksandria.model.rental.dtos.ExtendRentalRequest;
 import pl.agh.edu.to.aleksandria.model.user.User;
 
 import java.time.LocalDate;
@@ -136,6 +137,21 @@ public class RentalController {
                 rentalService.returnRental(rental_id),
                 HttpStatus.BAD_REQUEST,
                 "Could not return rental with given id"
+        );
+    }
+
+    // =======================
+    // *** PATCH endpoints ***
+    // =======================
+
+    // PATCH /rentals/extend
+    @PatchMapping("/extend")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ResponseEntity<Object> extendRental(@RequestBody ExtendRentalRequest request) {
+        return this.optionalToResponseEntity(
+                rentalService.extendRental(request),
+                HttpStatus.BAD_REQUEST,
+                "Could not extend rental with given data"
         );
     }
 

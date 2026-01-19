@@ -7,8 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class CreateRentalRequest {
-    private int userId;
-    private int bookId;
-    private int rentalDays;
+public class ExtendRentalRequest {
+    private int rentalId;
+    private int days;
 }

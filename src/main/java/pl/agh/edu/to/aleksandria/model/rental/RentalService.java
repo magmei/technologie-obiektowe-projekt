@@ -10,6 +10,7 @@ import pl.agh.edu.to.aleksandria.model.book.BookService;
 import pl.agh.edu.to.aleksandria.model.queue.QueueService;
 import pl.agh.edu.to.aleksandria.model.queue.dtos.QueueRequest;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
+import pl.agh.edu.to.aleksandria.model.rental.dtos.ExtendRentalRequest;
 import pl.agh.edu.to.aleksandria.model.title.Title;
 import pl.agh.edu.to.aleksandria.model.user.User;
 import pl.agh.edu.to.aleksandria.model.user.UserService;
@@ -76,6 +77,13 @@ public class RentalService {
                 .toList();
     }
 
+    public List<Rental> getOverdueRentalsOfUser(int userId) {
+        LocalDate today = LocalDate.now();
+        return rentalRepository.findByUser_Id(userId).stream()
+                .filter(rental -> rental.getReturnedOn() == null && rental.getDue().isBefore(today))
+                .toList();
+    }
+
     public boolean canCreateRental(int userId, int bookId) {
         // we allow creating rentals only if user/book exist, book is available and user has no overdue rentals
         // in addition, if the title of the book has a queue, the count of available books of that title is the
@@ -92,11 +100,8 @@ public class RentalService {
 
         Title title = book.get().getTitle();
 
-        List<Rental> userRentals = rentalRepository.findByUser_Id(userId);
-        for (Rental rental : userRentals) {
-            if (rental.getReturnedOn() == null && rental.getDue().isBefore(LocalDate.now())) {
-                return false; // user has an overdue rental
-            }
+        if (!getOverdueRentalsOfUser(userId).isEmpty()) {
+            return false; // user has overdue rentals
         }
 
         List<User> queue = queueService.getUsersWaitingForTitle(title.getId());
@@ -149,6 +154,35 @@ public class RentalService {
         mailService.sendOnRentalEmail(rental);
 
         return Optional.of(rentalRepository.save(rental));
+    }
+
+    public Optional<Rental> extendRental(ExtendRentalRequest request) {
+        int rentalId = request.getRentalId();
+        int extraDays = request.getDays();
+
+        // basic validation
+        if (extraDays <= 0) {
+            throw new IllegalArgumentException("Cannot extend rental by non-positive number of days");
+        }
+        Optional<Rental> rental = rentalRepository.findById(rentalId);
+        if (rental.isEmpty() || rental.get().getReturnedOn() != null) {
+            throw new IllegalArgumentException("Cannot extend non-existing or already returned rental");
+        }
+
+        // check if user has overdue rentals
+        if (!getOverdueRentalsOfUser(rental.get().getUser().getId()).isEmpty()) {
+            throw new IllegalStateException("Cannot extend rental for user with overdue rentals");
+        }
+
+        // if there is a queue for the title of the rented book, do not allow extension
+        Title title = rental.get().getBook().getTitle();
+        if (!queueService.getUsersWaitingForTitle(title.getId()).isEmpty()) {
+            throw new IllegalStateException("Cannot extend rental when there is a queue for the title of the rented book");
+        }
+
+        // otherwise, extend the rental
+        rental.get().setDue(rental.get().getDue().plusDays(extraDays));
+        return Optional.of(rentalRepository.save(rental.get()));
     }
 
     @Transactional
