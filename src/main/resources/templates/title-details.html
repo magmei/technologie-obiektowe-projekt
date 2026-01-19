@@ -105,6 +105,37 @@
     </div>
   </div>
 
+  <div class="card" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')" style="margin-top: 25px; border-top: 4px solid #17a2b8;">
+    <h3>Waiting Queue</h3>
+
+    <div th:if="${queue == null or queue.empty}" class="text-muted">
+      <p>No users are currently waiting for this title.</p>
+    </div>
+
+    <table th:if="${queue != null and !queue.empty}">
+      <thead>
+      <tr>
+        <th>Position</th>
+        <th>User Name</th>
+        <th>Email</th>
+        <th>Request Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="entry, iterStat : ${queue}">
+        <td th:text="${iterStat.count}" style="font-weight: bold;">1</td>
+        <td>
+          <a th:href="@{/users/details/{id}(id=${entry.user.id})}"
+             th:text="${entry.user.firstName} + ' ' + ${entry.user.lastName}"
+             style="color: #007bff; font-weight: bold;">User Name</a>
+        </td>
+        <td th:text="${entry.user.email}">email@example.com</td>
+        <td th:text="${#temporals.format(entry.requestDate, 'yyyy-MM-dd HH:mm')}">2026-01-01 12:00</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="card" style="margin-top: 25px;">
     <h3>User Reviews</h3>
 

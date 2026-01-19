@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import pl.agh.edu.to.aleksandria.model.rental.Rental;
+import pl.agh.edu.to.aleksandria.model.rental.RentalService;
 import pl.agh.edu.to.aleksandria.model.user.User;
 import pl.agh.edu.to.aleksandria.model.user.UserService;
 import pl.agh.edu.to.aleksandria.model.user.dtos.CreateUserRequest;
@@ -22,6 +21,7 @@ import java.util.Optional;
 public class WebUserController {
 
     private final UserService userService;
+    private final RentalService rentalService;
 
     @GetMapping("/list")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
@@ -54,6 +54,20 @@ public class WebUserController {
         }
 
         return "redirect:/users/list";
+    }
+
+    @GetMapping("/details/{id}")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public String userDetails(@PathVariable Integer id, Model model) {
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+
+        List<Rental> rentals = rentalService.getRentalsByUser(id);
+
+        model.addAttribute("user", user);
+        model.addAttribute("rentals", rentals);
+
+        return "user-details";
     }
 
     @PostMapping("/delete")

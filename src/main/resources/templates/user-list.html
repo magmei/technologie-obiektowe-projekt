@@ -49,7 +49,14 @@
       <tbody>
       <tr th:each="user : ${users}">
         <td th:text="${user.id}">1</td>
-        <td th:text="${user.firstName} + ' ' + ${user.lastName}">John Doe</td>
+        <td>
+          <a th:href="@{/users/details/{id}(id=${user.id})}"
+             th:text="${user.firstName} + ' ' + ${user.lastName}"
+             style="color: #007bff; font-weight: bold; text-decoration: none;">
+            John Doe
+          </a>
+        </td>
+
         <td th:text="${user.email}">email@example.com</td>
         <td>
           <span class="badge" th:classappend="'role-' + ${user.role.name}" th:text="${user.role.name}">READER</span>

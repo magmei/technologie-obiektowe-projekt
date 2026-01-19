@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.book.BookService;
+import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
+import pl.agh.edu.to.aleksandria.model.queue.QueueService;
 import pl.agh.edu.to.aleksandria.model.review.Review;
 import pl.agh.edu.to.aleksandria.model.review.ReviewService;
 import pl.agh.edu.to.aleksandria.model.review.dtos.CreateReviewRequest;
@@ -29,6 +31,7 @@ public class WebTitleController {
     private final TitleService titleService;
     private final ReviewService reviewService;
     private final BookService bookService;
+    private final QueueService queueService;
 
     @GetMapping("/view/{id}")
     public String viewTitle(@PathVariable Integer id, Model model) {
@@ -37,16 +40,15 @@ public class WebTitleController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid title Id:" + id));
         model.addAttribute("title", title);
 
-        // 2. Fetch Reviews
         List<Review> reviews = reviewService.getAllReviewsByTitleId(id);
         model.addAttribute("reviews", reviews);
 
-        // 3. FETCH BOOKS (Fix for the error)
-        // You might need to add getBooksByTitleId to your BookService if it doesn't exist
         List<Book> books = bookService.getBooksByTitleId(id);
         model.addAttribute("books", books);
 
-        // 4. Current User
+        List<QueueEntry> queue = queueService.getQueueEntriesForTitle(id);
+        model.addAttribute("queue", queue);
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof User) {
             model.addAttribute("currentUser", (User) auth.getPrincipal());
@@ -59,18 +61,12 @@ public class WebTitleController {
     @PreAuthorize("hasRole('READER')")
     public String addReview(@RequestParam Integer titleId,
                             @RequestParam Integer rating,
-                            @RequestParam String comment) { // The HTML form sends 'comment'
+                            @RequestParam String comment) {
 
         CreateReviewRequest request = new CreateReviewRequest();
         request.setTitleId(titleId);
         request.setRating(rating);
-
-        // Map the form's 'comment' to your DTO's text field.
-        // Assuming your DTO has setReviewText or setComment.
-        // If your DTO matches the Entity, it probably expects 'reviewText'.
         request.setReviewText(comment);
-
-        // If your DTO needs the user ID, get it from context
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) auth.getPrincipal();
         request.setUserId(currentUser.getId());
@@ -123,4 +119,6 @@ public class WebTitleController {
 
         return "redirect:/titles/view/" + id;
     }
+
+
 }

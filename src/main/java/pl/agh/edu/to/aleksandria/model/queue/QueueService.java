@@ -99,6 +99,16 @@ public class QueueService {
         return -1;
     }
 
+    public List<QueueEntry> getQueueEntriesForTitle(int titleId) {
+        Optional<Title> titleOpt = titleService.getTitleById(titleId);
+        if (titleOpt.isEmpty()) {
+            return List.of();
+        }
+        List<QueueEntry> entries = queueRepository.findAllByTitle(titleOpt.get());
+        entries.sort(Comparator.comparing(QueueEntry::getRequestDate));
+        return entries;
+    }
+
     @Transactional
     public boolean removeUserFromQueue(QueueRequest request) {
         int userId = request.getUserId();
