@@ -19,9 +19,12 @@ import pl.agh.edu.to.aleksandria.model.title.TitleService;
 import pl.agh.edu.to.aleksandria.model.title.dtos.CreateTitleRequest;
 import pl.agh.edu.to.aleksandria.model.title.dtos.UpdateTitleRequest;
 import pl.agh.edu.to.aleksandria.model.user.User;
+import pl.agh.edu.to.aleksandria.model.user.UserService;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/titles")
@@ -32,16 +35,24 @@ public class WebTitleController {
     private final ReviewService reviewService;
     private final BookService bookService;
     private final QueueService queueService;
+    private final UserService userService;
 
     @GetMapping("/view/{id}")
     public String viewTitle(@PathVariable Integer id, Model model) {
-        // 1. Fetch Title
-        Title title = titleService.getTitleById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid title Id:" + id));
+        Title title = titleService.getTitleById(id).orElseThrow(() -> new IllegalArgumentException("Invalid title Id:" + id));
         model.addAttribute("title", title);
 
         List<Review> reviews = reviewService.getAllReviewsByTitleId(id);
         model.addAttribute("reviews", reviews);
+
+        Map<Integer, User> authors = new HashMap<>();
+        for (Review review : reviews) {
+            int userId = review.getUserId();
+            if (!authors.containsKey(userId)) {
+                userService.getUserById(userId).ifPresent(user -> authors.put(userId, user));
+            }
+        }
+        model.addAttribute("authors", authors);
 
         List<Book> books = bookService.getBooksByTitleId(id);
         model.addAttribute("books", books);
@@ -59,9 +70,7 @@ public class WebTitleController {
 
     @PostMapping("/review/add")
     @PreAuthorize("hasRole('READER')")
-    public String addReview(@RequestParam Integer titleId,
-                            @RequestParam Integer rating,
-                            @RequestParam String comment) {
+    public String addReview(@RequestParam Integer titleId, @RequestParam Integer rating, @RequestParam String comment) {
 
         CreateReviewRequest request = new CreateReviewRequest();
         request.setTitleId(titleId);
@@ -78,9 +87,7 @@ public class WebTitleController {
 
     @PostMapping("/web/create")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
-    public String createTitle(@RequestParam String titleName,
-                              @RequestParam String author,
-                              @RequestParam(required = false) Integer genreId) {
+    public String createTitle(@RequestParam String titleName, @RequestParam String author, @RequestParam(required = false) Integer genreId) {
 
         CreateTitleRequest request = new CreateTitleRequest(titleName, author, Collections.singletonList(genreId));
 
@@ -97,23 +104,9 @@ public class WebTitleController {
                               @RequestParam(required = false) Integer genreToAdd,
                               @RequestParam(required = false) Integer genreToDelete) {
 
-        // logic to wrap single IDs into Lists (or null if empty)
-        List<Integer> toAdd = (genreToAdd != null)
-                ? Collections.singletonList(genreToAdd)
-                : Collections.emptyList();
-
-        List<Integer> toDelete = (genreToDelete != null)
-                ? Collections.singletonList(genreToDelete)
-                : Collections.emptyList();
-
-        // Create the DTO using the AllArgsConstructor
-        UpdateTitleRequest request = new UpdateTitleRequest(
-                id,
-                titleName,
-                author,
-                toAdd,
-                toDelete
-        );
+        List<Integer> toAdd = (genreToAdd != null) ? Collections.singletonList(genreToAdd) : Collections.emptyList();
+        List<Integer> toDelete = (genreToDelete != null) ? Collections.singletonList(genreToDelete) : Collections.emptyList();
+        UpdateTitleRequest request = new UpdateTitleRequest(id, titleName, author, toAdd, toDelete);
 
         titleService.updateTitle(request);
 

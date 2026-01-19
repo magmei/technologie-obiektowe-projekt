@@ -53,7 +53,7 @@
           <p style="color: #dc3545; font-weight: bold;">All copies are currently rented.</p>
         </div>
       </div>
-      <p th:if="${books == null or books.empty}">No copies currently in the library system.</p>
+      <p th:if="${books == null or books.empty}">No copies are currently in the library system.</p>
     </div>
 
     <div sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">
@@ -136,11 +136,48 @@
     </table>
   </div>
 
+  <div class="card" sec:authorize="hasRole('READER')" style="margin-top: 25px; border-left: 5px solid #007bff;">
+    <h3>Availability Status</h3>
+
+    <div th:with="isInQueue=${queue.![user.id].contains(currentUser.id)}, availableCount=${books.?[available == true].size()}">
+
+      <div th:if="${isInQueue}">
+        <p style="color: #007bff; font-weight: bold;">
+          You are currently waiting for this title.
+        </p>
+        <form th:action="@{/queue/web/leave}" method="post">
+          <input type="hidden" name="titleId" th:value="${title.id}" />
+          <button type="submit" class="btn btn-danger btn-sm">Leave Queue</button>
+        </form>
+      </div>
+
+      <div th:if="${!isInQueue and availableCount > 0}">
+        <p style="color: #28a745;">
+          <span style="font-size:1.2em;">&#10003;</span>
+          There are <strong>[[${availableCount}]]</strong> copy(s) available! Visit the library to rent one.
+        </p>
+      </div>
+
+      <div th:if="${!isInQueue and availableCount == 0}">
+        <p style="color: #dc3545;">
+          All physical copies are currently rented.
+        </p>
+        <p>Join the waiting list to be notified when a copy becomes available.</p>
+
+        <form th:action="@{/queue/web/join}" method="post">
+          <input type="hidden" name="titleId" th:value="${title.id}" />
+          <button type="submit" class="btn btn-primary">Join Waiting Queue</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
   <div class="card" style="margin-top: 25px;">
-    <h3>User Reviews</h3>
+    <h3>Reviews</h3>
 
     <div th:if="${reviews == null or reviews.empty}" class="text-muted">
-      <p>No reviews yet. Be the first to write one!</p>
+      <p>No reviews</p>
     </div>
 
     <div th:each="review : ${reviews}" style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
@@ -153,13 +190,26 @@
                         <span th:if="${review.rating >= 4}">&#9733;</span><span th:if="${review.rating < 4}">&#9734;</span>
                         <span th:if="${review.rating >= 5}">&#9733;</span><span th:if="${review.rating < 5}">&#9734;</span>
                     </span>
-          <span class="text-muted" style="margin-left: 10px; font-size: 0.9em;"
-                th:text="'User #' + ${review.userId}">User #1</span>
+          <span class="text-muted" style="margin-left: 10px; font-size: 0.9em; font-weight: bold;"
+                th:text="${authors.containsKey(review.userId) ? (authors.get(review.userId).firstName + ' ' + authors.get(review.userId).lastName) : 'Unknown User'}">
+                 User Name
+           </span>
         </div>
 
-        <div th:if="${currentUser != null}">
+        <div th:if="${currentUser != null}" style="display:flex; gap: 5px;">
+
+          <button th:if="${currentUser.id == review.userId}"
+                  class="btn btn-warning btn-sm"
+                  style="padding: 2px 8px; font-size: 0.8rem;"
+                  th:data-id="${review.reviewId}"
+                  th:data-rating="${review.rating}"
+                  th:data-text="${review.reviewText}"
+                  onclick="openEditReviewModal(this.getAttribute('data-id'), this.getAttribute('data-rating'), this.getAttribute('data-text'))">
+            Edit
+          </button>
+
           <form th:action="@{/reviews/web/delete}" method="post"
-                th:if="${currentUser.role.name == 'ADMIN' or currentUser.id == review.userId}"
+                th:if="${currentUser.role.name == 'admin' or currentUser.id == review.userId}"
                 onsubmit="return confirm('Delete this review?');">
             <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
             <input type="hidden" name="titleId" th:value="${title.id}" />
@@ -198,6 +248,38 @@
     </div>
   </div>
 
+</div>
+
+<div id="editReviewModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeEditReviewModal()">&times;</span>
+    <h2>Edit Review</h2>
+    <form th:action="@{/reviews/web/update}" method="post">
+      <input type="hidden" name="titleId" th:value="${title.id}" />
+      <input type="hidden" id="editReviewId" name="reviewId" />
+
+      <div class="form-group">
+        <label for="editRating">Rating</label>
+        <select name="rating" id="editRating" required style="width: 150px; padding: 5px;">
+          <option value="5">5 - Excellent</option>
+          <option value="4">4 - Good</option>
+          <option value="3">3 - Average</option>
+          <option value="2">2 - Poor</option>
+          <option value="1">1 - Terrible</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="editComment">Comment</label>
+        <textarea name="comment" id="editComment" rows="3" required
+                  style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;"></textarea>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-warning" style="width: 100%;">Update Review</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div id="editTitleModal" class="modal">
@@ -264,6 +346,31 @@
       closeEditModal();
     }
   }
+
+  var editReviewModal = document.getElementById("editReviewModal");
+
+  function openEditReviewModal(reviewId, rating, text) {
+    document.getElementById("editReviewId").value = reviewId;
+    document.getElementById("editRating").value = rating;
+    document.getElementById("editComment").value = text;
+    editReviewModal.style.display = "flex";
+  }
+
+  function closeEditReviewModal() {
+    editReviewModal.style.display = "none";
+  }
+
+  // Close when clicking outside
+  window.onclick = function(event) {
+    if (event.target == editReviewModal) {
+      closeEditReviewModal();
+    }
+    // Keep existing logic for other modals if present
+    if (typeof editModal !== 'undefined' && event.target == editModal) {
+      closeEditModal();
+    }
+  }
+
 </script>
 
 </body>

@@ -8,9 +8,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.agh.edu.to.aleksandria.model.review.Review;
 import pl.agh.edu.to.aleksandria.model.review.ReviewService;
 import pl.agh.edu.to.aleksandria.model.review.dtos.CreateReviewRequest;
+import pl.agh.edu.to.aleksandria.model.review.dtos.UpdateReviewRequest;
 import pl.agh.edu.to.aleksandria.model.user.User;
+
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/reviews")
@@ -19,34 +23,44 @@ public class WebReviewController {
 
     private final ReviewService reviewService;
 
-    // POST /reviews/web/add
     @PostMapping("/web/add")
     @PreAuthorize("hasRole('READER')")
-    public String addReview(@RequestParam Integer titleId,
-                            @RequestParam Integer rating,
-                            @RequestParam String comment) {
+    public String addReview(@RequestParam Integer titleId, @RequestParam Integer rating, @RequestParam String comment) {
 
-        // Get currently logged-in user
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) auth.getPrincipal();
-
-        // Create the DTO
         CreateReviewRequest request = new CreateReviewRequest(titleId, user.getId(), comment, rating);
-
         reviewService.createReview(request);
 
         return "redirect:/titles/view/" + titleId;
     }
 
-    // POST /reviews/web/delete
+    @PostMapping("/web/update")
+    @PreAuthorize("isAuthenticated()")
+    public String updateReview(@RequestParam Integer reviewId, @RequestParam Integer titleId, @RequestParam Integer rating, @RequestParam String comment) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) auth.getPrincipal();
+
+        Optional<Review> existingReview = reviewService.getReviewById(reviewId);
+
+        if (existingReview.isPresent()) {
+            Review review = existingReview.get();
+
+            if (review.getUserId() == currentUser.getId()) {
+                UpdateReviewRequest request = new UpdateReviewRequest(reviewId, comment, rating);
+                reviewService.updateReview(request);
+            } else {
+                System.out.println("Unauthorized attempt to edit review by user " + currentUser.getId());
+            }
+        }
+
+        return "redirect:/titles/view/" + titleId;
+    }
+
     @PostMapping("/web/delete")
     @PreAuthorize("isAuthenticated()")
-    public String deleteReview(@RequestParam Integer reviewId,
-                               @RequestParam Integer titleId) {
-        // The service or security layer should ideally handle the "isOwner" check.
-        // For simplicity in this web layer, we rely on the service method or pre-checks.
-        // However, standard @PreAuthorize on the service method is best.
-        // Here we just call delete.
+    public String deleteReview(@RequestParam Integer reviewId, @RequestParam Integer titleId) {
 
         reviewService.deleteReview(reviewId);
 

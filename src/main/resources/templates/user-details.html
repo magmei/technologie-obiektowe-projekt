@@ -137,6 +137,41 @@
     </div>
   </div>
 
+  <div class="card" th:if="${user.role.name == 'reader'}">
+    <h3>Queue Status</h3>
+
+    <div th:if="${queueEntries == null or queueEntries.empty}" class="text-muted">
+      <p>This user is not currently waiting for any books.</p>
+    </div>
+
+    <table th:if="${queueEntries != null and !queueEntries.empty}">
+      <thead>
+      <tr>
+        <th>Book Title</th>
+        <th>Request Date</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="entry : ${queueEntries}">
+        <td>
+          <a th:href="@{/titles/view/{id}(id=${entry.title.id})}"
+             th:text="${entry.title.titleName}"
+             style="font-weight: bold; color: #007bff; text-decoration: none;">Title</a>
+        </td>
+        <td th:text="${#temporals.format(entry.requestDate, 'yyyy-MM-dd HH:mm')}">2026-01-01 12:00</td>
+        <td>
+          <form th:action="@{/queue/web/admin/remove}" method="post" onsubmit="return confirm('Remove this user from the queue?');">
+            <input type="hidden" name="userId" th:value="${user.id}" />
+            <input type="hidden" name="titleId" th:value="${entry.title.id}" />
+            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 </body>

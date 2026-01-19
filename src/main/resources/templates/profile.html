@@ -11,20 +11,29 @@
 
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2>My Profile</h2>
+      <div style="display:flex; align-items:center; gap: 15px;">
+        <h2>My Profile</h2>
+        <button onclick="openEditProfileModal()" class="btn btn-warning btn-sm">Edit Profile</button>
+      </div>
       <span class="badge" th:classappend="'role-' + ${user.role.name}" th:text="${user.role.name}">ROLE</span>
     </div>
-    <div class="info-grid">
+
+    <div class="info-grid" style="margin-top: 15px;">
       <span class="label">Full Name:</span>
       <span th:text="${user.firstName} + ' ' + ${user.lastName}">John Doe</span>
+
       <span class="label">Email:</span>
       <span th:text="${user.email}">john@example.com</span>
+
+      <span class="label">Address:</span>
+      <span th:text="${user.address}">Street 123</span>
+
       <span class="label">User ID:</span>
       <span th:text="${user.id}">123</span>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" th:if="${user.role.name == 'reader'}">
     <h3>My Active Rentals</h3>
 
     <div th:if="${rentals == null or rentals.empty}" class="text-muted">
@@ -52,8 +61,8 @@
         <td th:text="${rental.rentedOn}">2023-01-01</td>
         <td th:text="${rental.due}">2023-01-15</td>
         <td>
-                         <span th:if="${rental.due.isBefore(#temporals.createToday())}"
-                               class="status-rented">OVERDUE</span>
+           <span th:if="${rental.due.isBefore(#temporals.createToday())}"
+                 class="status-rented">OVERDUE</span>
           <span th:unless="${rental.due.isBefore(#temporals.createToday())}"
                 class="status-avail">Active</span>
         </td>
@@ -62,7 +71,7 @@
     </table>
   </div>
 
-  <div class="card">
+  <div class="card" th:if="${user.role.name == 'reader'}">
     <h3>My Queue Status</h3>
 
     <div th:if="${queue == null or queue.empty}" class="text-muted">
@@ -96,26 +105,64 @@
     </table>
   </div>
 
-  <div class="card" th:if="${user.role.name == 'LIBRARIAN' or user.role.name == 'ADMIN'}">
-    <h2 style="color: #1b5e20;">Librarian Console</h2>
-    <div class="actions-grid">
-      <a th:href="@{/rentals/all}" class="btn-action librarian-btn">Manage Rentals</a>
-      <a th:href="@{/users/all}" class="btn-action librarian-btn">Manage Users</a>
-      <a th:href="@{/genres/all}" class="btn-action librarian-btn">Manage Genres</a>
-    </div>
-  </div>
-
-  <div class="card" th:if="${user.role.name == 'ADMIN'}">
-    <h2 style="color: #b71c1c;">Administration</h2>
-    <div class="actions-grid">
-      <a th:href="@{/users/create}" class="btn-action admin-btn">Create Staff</a>
-    </div>
-  </div>
-
   <div style="text-align: center; margin-top: 20px;">
     <a th:href="@{/logout}" class="btn logout-btn">Logout</a>
   </div>
 </div>
+
+<div id="editProfileModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeEditProfileModal()">&times;</span>
+
+    <h2>Edit My Profile</h2>
+
+    <form th:action="@{/users/web/update}" method="post">
+      <input type="hidden" name="id" th:value="${user.id}" />
+
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="firstName" th:value="${user.firstName}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="lastName" th:value="${user.lastName}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" th:value="${user.email}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" th:value="${user.address}" required />
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-warning" style="width: 100%;">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var profileModal = document.getElementById("editProfileModal");
+
+  function openEditProfileModal() {
+    profileModal.style.display = "flex";
+  }
+
+  function closeEditProfileModal() {
+    profileModal.style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    if (event.target == profileModal) {
+      closeEditProfileModal();
+    }
+  }
+</script>
 
 </body>
 </html>
