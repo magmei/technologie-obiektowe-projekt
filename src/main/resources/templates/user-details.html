@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
   <title>User Details - Aleksandria</title>
   <link rel="stylesheet" th:href="@{/css/style.css}" />
@@ -27,18 +27,25 @@
 
   <div class="card">
     <div class="flex-between">
-      <h2>User Details</h2>
+      <h2 th:text="${user.firstName} + ' ' + ${user.lastName}">John Doe</h2>
       <span class="badge" th:classappend="'role-' + ${user.role.name}" th:text="${user.role.name}">ROLE</span>
     </div>
-    <div class="info-grid">
-      <span class="label">Full Name:</span>
-      <span th:text="${user.firstName} + ' ' + ${user.lastName}">John Doe</span>
-      <span class="label">Email:</span>
-      <span th:text="${user.email}">email@example.com</span>
-      <span class="label">Address:</span>
-      <span th:text="${user.address}">Street 1</span>
-      <span class="label">User ID:</span>
-      <span th:text="${user.id}">1</span>
+    <div class="info-grid" style="display: flex; flex-direction: column; gap: 8px;">
+
+      <div>
+        <span class="label" style="font-weight: bold;">Email:</span>
+        <span th:text="${user.email}">email@example.com</span>
+      </div>
+
+      <div>
+        <span class="label" style="font-weight: bold;">Address:</span>
+        <span th:text="${user.address}">Street 1</span>
+      </div>
+
+      <div>
+        <span class="label" style="font-weight: bold;">User ID:</span>
+        <span th:text="${user.id}">1</span>
+      </div>
     </div>
   </div>
 
@@ -58,7 +65,6 @@
           <th>Copy ID</th>
           <th>Rented On</th>
           <th>Due Date</th>
-          <th>Status</th>
           <th>Actions</th>
         </tr>
         </thead>
@@ -73,11 +79,7 @@
           <td th:text="${rental.rentedOn}">2023-01-01</td>
           <td th:text="${rental.due}"
               th:style="${rental.due.isBefore(#temporals.createToday())} ? 'color: red; font-weight: bold;' : ''">
-            2023-01-14
-          </td>
-          <td>
-            <span th:if="${rental.due.isBefore(#temporals.createToday())}" style="color: red; font-weight:bold;">OVERDUE</span>
-            <span th:unless="${rental.due.isBefore(#temporals.createToday())}" style="color: green;">Active</span>
+            2025-01-14
           </td>
           <td style="display:flex; gap: 5px;">
             <form th:action="@{/rentals/web/return}" method="post" onsubmit="return confirm('Confirm return?');">

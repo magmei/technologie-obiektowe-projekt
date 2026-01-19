@@ -15,15 +15,14 @@
     </div>
 
     <div sec:authorize="isAuthenticated()">
-        <span style="margin-right: 15px;">Welcome, <span sec:authentication="name">User</span>!</span>
+        <span style="margin-right: 15px;">Welcome, <span sec:authentication="name">User</span></span>
+
         <a th:href="@{/profile}" class="btn" style="background-color: #28a745; color: white; margin-right: 10px;">My Profile</a>
-        <a th:href="@{/logout}" class="btn logout-btn">Logout</a>
+        <a th:href="@{/users/list}" class="btn btn-primary" style="margin-right: 10px;" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">Manage Users</a>
+        <button onclick="openModal()" class="btn btn-primary" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">+ Add New Title</button>
     </div>
 
-    <div sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">
-        <a th:href="@{/users/list}" class="btn btn-primary" style="margin-right: 10px;">Manage Users</a>
-        <button onclick="openModal()" class="btn btn-success">+ Add New Title</button>
-    </div>
+
 </header>
 
 <div class="container">

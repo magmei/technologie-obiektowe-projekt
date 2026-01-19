@@ -8,52 +8,42 @@
 <body>
 
 <div class="container">
+  <a th:href="@{/}" class="back-link">&larr; Back</a>
 
   <div class="header-section">
-    <div>
-      <h1 th:text="${title.titleName}">Title Name</h1>
-      <div class="meta">
-        Author: <strong th:text="${title.author}">Author</strong> |
-        Genres: <span th:each="g : ${title.genres}" class="genre-tag" th:text="${g.name}">Genre</span>
-      </div>
-    </div>
-    <div>
-      <a th:href="@{/}" class="btn btn-back">Back to Catalog</a>
+    <h1 th:text="${title.titleName}">Title Name</h1>
+    <div class="meta">
+      Author: <strong th:text="${title.author}">Author</strong> |
+      Genres: <span th:each="g : ${title.genres}" class="genre-tag" th:text="${g.name}">Genre</span>
     </div>
   </div>
 
-  <div class="admin-controls" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+  <div class="admin-controls" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; margin-top: 25px; border: 1px solid #e9ecef;">
     <strong style="display:block; margin-bottom:10px;">Title Management:</strong>
 
-    <button onclick="openEditModal()" class="btn btn-warning btn-sm">Edit Metadata</button>
+    <button onclick="openEditModal()" class="btn btn-primary">Edit Metadata</button>
 
     <form th:action="@{/titles/delete}" method="post" style="display:inline;" onsubmit="return confirm('Delete this title and all its books?');">
       <input type="hidden" name="id" th:value="${title.id}" />
-      <button type="submit" class="btn btn-delete">Delete Title</button>
+      <button type="submit" class="btn btn-primary">Delete Title</button>
     </form>
 
-    <form th:action="@{/books/web/create}" method="post" style="display:inline; margin-left: 20px; border-left: 1px solid #ccc; padding-left: 20px;">
+    <form th:action="@{/books/web/create}" method="post" style="display:inline;">
       <input type="hidden" name="titleId" th:value="${title.id}" />
-      <button type="submit" class="btn btn-action" style="background-color: #28a745;">+ Add Physical Copy</button>
+      <button type="submit" class="btn btn-primary">+ Add new Copy</button>
     </form>
   </div>
 
   <div class="section">
-    <h3>Physical Copies</h3>
 
     <div sec:authorize="hasRole('READER')">
       <div th:if="${books != null and !books.empty}">
         <p style="font-size: 1.1em;">
-          Library Holdings: <strong th:text="${books.size()}">10</strong> <br>
           Currently Available:
-          <strong style="color: #28a745;"
-                  th:text="${books.?[available == true].size()}">5</strong>
+          <strong style="color: #28a745;" th:text="${books.?[available == true].size()}">5</strong>
         </p>
-        <div th:if="${books.?[available == true].size() == 0}">
-          <p style="color: #dc3545; font-weight: bold;">All copies are currently rented.</p>
-        </div>
       </div>
-      <p th:if="${books == null or books.empty}">No copies are currently in the library system.</p>
+      <p th:if="${books == null or books.empty}">Error</p>
     </div>
 
     <div sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">
@@ -65,6 +55,7 @@
           <th>Book ID</th>
           <th>Status</th>
           <th>Staff Actions</th>
+          <th>Delete</th>
         </tr>
         </thead>
         <tbody>
@@ -105,8 +96,8 @@
     </div>
   </div>
 
-  <div class="card" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')" style="margin-top: 25px; border-top: 4px solid #17a2b8;">
-    <h3>Waiting Queue</h3>
+  <div class="card" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')" style="margin-top: 25px;">
+    <h3>Queue</h3>
 
     <div th:if="${queue == null or queue.empty}" class="text-muted">
       <p>No users are currently waiting for this title.</p>
@@ -136,12 +127,11 @@
     </table>
   </div>
 
-  <div class="card" sec:authorize="hasRole('READER')" style="margin-top: 25px; border-left: 5px solid #007bff;">
-    <h3>Availability Status</h3>
+  <div sec:authorize="hasRole('READER')" style="margin-top: 25px">
 
     <div th:with="isInQueue=${queue.![user.id].contains(currentUser.id)}, availableCount=${books.?[available == true].size()}">
 
-      <div th:if="${isInQueue}">
+      <div class="card" th:if="${isInQueue}">
         <p style="color: #007bff; font-weight: bold;">
           You are currently waiting for this title.
         </p>
@@ -151,17 +141,8 @@
         </form>
       </div>
 
-      <div th:if="${!isInQueue and availableCount > 0}">
-        <p style="color: #28a745;">
-          <span style="font-size:1.2em;">&#10003;</span>
-          There are <strong>[[${availableCount}]]</strong> copy(s) available! Visit the library to rent one.
-        </p>
-      </div>
-
-      <div th:if="${!isInQueue and availableCount == 0}">
-        <p style="color: #dc3545;">
-          All physical copies are currently rented.
-        </p>
+      <div class="card" th:if="${!isInQueue and availableCount == 0}">
+        <p style="color: #dc3545;">All copies are currently rented.</p>
         <p>Join the waiting list to be notified when a copy becomes available.</p>
 
         <form th:action="@{/queue/web/join}" method="post">
@@ -196,7 +177,7 @@
            </span>
         </div>
 
-        <div th:if="${currentUser != null}" style="display:flex; gap: 5px;">
+        <div th:if="${currentUser != null}" style="display:flex; align-items: center; gap: 5px;">
 
           <button th:if="${currentUser.id == review.userId}"
                   class="btn btn-warning btn-sm"
@@ -210,12 +191,15 @@
 
           <form th:action="@{/reviews/web/delete}" method="post"
                 th:if="${currentUser.role.name == 'admin' or currentUser.id == review.userId}"
-                onsubmit="return confirm('Delete this review?');">
+                onsubmit="return confirm('Delete this review?');"
+                style="display: contents;">
             <input type="hidden" name="reviewId" th:value="${review.reviewId}" />
             <input type="hidden" name="titleId" th:value="${title.id}" />
             <button type="submit" class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size: 0.8rem;">Delete</button>
           </form>
+
         </div>
+
       </div>
 
       <p style="margin: 8px 0 0 0; color: #333;" th:text="${review.reviewText}">Great book!</p>
