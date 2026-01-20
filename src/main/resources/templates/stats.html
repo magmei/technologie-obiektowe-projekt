@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <title>Library Statistics</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <style>
+    .stats-container { display: flex; gap: 20px; margin-top: 20px; }
+    .stats-nav { flex: 0 0 250px; display: flex; flex-direction: column; gap: 10px; }
+    .stats-nav button { width: 100%; text-align: left; padding: 12px 15px; background: #fff; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; color: #555; }
+    .stats-nav button:hover { background-color: #f8f9fa; }
+    .stats-nav button.active { background-color: #007bff; color: white; border-color: #007bff; font-weight: bold; }
+    .stats-nav button.active-staff { background-color: #1b5e20; color: white; border-color: #1b5e20; }
+    .stats-content { flex: 1; }
+    .stat-tab { display: none; }
+    .stat-tab.active-content { display: block; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .section-title { font-size: 0.85em; text-transform: uppercase; color: #999; font-weight: bold; margin: 10px 0 5px 0; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    th.sortable {
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+    }
+    th.sortable:hover {
+      background-color: #eaeaea;
+    }
+    th.sortable::after {
+      content: ' \2195';
+      color: #ccc;
+      font-size: 0.8em;
+      margin-left: 5px;
+    }
+    th.asc::after {
+      content: ' \2191';
+      color: #333;
+    }
+    th.desc::after {
+      content: ' \2193';
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div style="display:flex; justify-content: space-between; align-items: center;">
+    <h2>Library Analytics</h2>
+    <a th:href="@{/}" class="btn btn-sm btn-light">&larr; Back to Home</a>
+  </div>
+
+  <div class="stats-container">
+    <div class="stats-nav">
+
+      <button class="tab-btn" data-target="rated" th:data-url="@{/stats/fragments/rated}" onclick="loadTab(this)">
+        Top Rated Books
+      </button>
+      <button class="tab-btn" data-target="availability" th:data-url="@{/stats/fragments/availability}" onclick="loadTab(this)">
+        Book Availability
+      </button>
+      <button class="tab-btn" data-target="finance" th:data-url="@{/stats/fragments/financials}" onclick="loadTab(this)">
+        Financial Summary
+      </button>
+      <button class="tab-btn" data-target="pop-books" th:data-url="@{/stats/fragments/popular-books}" onclick="loadTab(this)">
+        Most Rented Books
+      </button>
+      <button class="tab-btn" data-target="pop-genres" th:data-url="@{/stats/fragments/popular-genres}" onclick="loadTab(this)">
+        Genre Popularity
+      </button>
+
+    </div>
+
+    <div class="stats-content">
+      <div id="rated" class="stat-tab card"></div>
+      <div id="availability" class="stat-tab card"></div>
+      <div id="finance" class="stat-tab card"></div>
+      <div id="pop-books" class="stat-tab card"></div>
+      <div id="pop-genres" class="stat-tab card"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function loadTab(btn) {
+    var targetId = btn.getAttribute('data-target');
+    var url = btn.getAttribute('data-url');
+    var container = document.getElementById(targetId);
+
+    var allTabs = document.getElementsByClassName("stat-tab");
+    for (var i = 0; i < allTabs.length; i++) { allTabs[i].classList.remove("active-content"); }
+    var allBtns = document.getElementsByClassName("tab-btn");
+    for (var i = 0; i < allBtns.length; i++) { allBtns[i].classList.remove("active"); allBtns[i].classList.remove("active-staff"); }
+
+    container.classList.add("active-content");
+    if (btn.classList.contains('staff-btn')) { btn.classList.add("active-staff"); } else { btn.classList.add("active"); }
+
+    if (!container.hasChildNodes() || container.innerHTML.trim() === "") {
+      container.innerHTML = '<div class="spinner"></div><p style="text-align:center">Loading data...</p>';
+      fetch(url)
+              .then(response => { if (!response.ok) throw new Error("Network error"); return response.text(); })
+              .then(html => { container.innerHTML = html; })
+              .catch(error => { container.innerHTML = '<p style="color:red">Error loading data.</p>'; console.error(error); });
+    }
+  }
+
+  function sortTable(header, colIndex) {
+    const table = header.closest('table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    const isAsc = !header.classList.contains('asc');
+
+    table.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+    header.classList.add(isAsc ? 'asc' : 'desc');
+
+    const direction = isAsc ? 1 : -1;
+
+    rows.sort((rowA, rowB) => {
+      const cellA = rowA.children[colIndex];
+      const cellB = rowB.children[colIndex];
+      const valA = cellA.getAttribute('data-val') !== null ? cellA.getAttribute('data-val') : cellA.innerText.trim();
+      const valB = cellB.getAttribute('data-val') !== null ? cellB.getAttribute('data-val') : cellB.innerText.trim();
+
+      const numA = parseFloat(valA);
+      const numB = parseFloat(valB);
+
+      const isNumA = !isNaN(numA);
+      const isNumB = !isNaN(numB);
+
+      if (isNumA && isNumB) {
+        return (numA - numB) * direction;
+      }
+
+      if (!isNumA && !isNumB) {
+        return valA.toString().localeCompare(valB.toString()) * direction;
+      }
+
+      if (!isNumA) return -1 * direction;
+      if (!isNumB) return 1 * direction;
+
+      return 0;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+    var firstBtn = document.querySelector(".tab-btn");
+    if(firstBtn) { loadTab(firstBtn); }
+  });
+</script>
+
+</body>
+</html>

@@ -19,6 +19,7 @@
 
         <a th:href="@{/profile}" class="btn" style="background-color: #28a745; color: white; margin-right: 10px;">My Profile</a>
         <a th:href="@{/users/list}" class="btn btn-primary" style="margin-right: 10px;" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">Manage Users</a>
+        <a th:href="@{/stats}" class="btn btn-primary" style="margin-right: 10px;" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">Statistics</a>
         <button onclick="openModal()" class="btn btn-primary" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">+ Add New Title</button>
     </div>
 
