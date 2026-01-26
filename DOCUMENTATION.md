@@ -12,6 +12,7 @@
 * **Tokeny:** JJWT (Java JWT) - moduły `api`, `impl`, `jackson` w wersji 0.11.5
 * **Redukcja kodu:** Project Lombok
 * **Testy:** JUnit 5
+* **Widoki:** Thymeleaf
 
 ## 3. Architektura i model danych
 

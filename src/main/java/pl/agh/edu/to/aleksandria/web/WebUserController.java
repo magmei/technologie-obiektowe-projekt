@@ -44,7 +44,7 @@ public class WebUserController {
                              @RequestParam String password,
                              @RequestParam String address,
                              @RequestParam String roleName,
-                             RedirectAttributes redirectAttributes) { // <--- Inject this
+                             RedirectAttributes redirectAttributes) {
 
         CreateUserRequest request = new CreateUserRequest(
                 firstName, lastName, email, password, address, roleName
@@ -105,8 +105,6 @@ public class WebUserController {
     @PostMapping("/delete")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public String deleteUser(@RequestParam Integer id) {
-        // The service layer (or RoleSecurity) handles the logic of
-        // "Librarian cannot delete Admin".
         userService.deleteUser(id);
         return "redirect:/users/list";
     }

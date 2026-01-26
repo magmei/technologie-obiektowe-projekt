@@ -18,10 +18,7 @@ public class HomeController {
     public String home(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Check if a user is logged in (and not just an "anonymous" guest)
-        boolean isLoggedIn = auth != null &&
-                auth.isAuthenticated() &&
-                !(auth instanceof AnonymousAuthenticationToken);
+        boolean isLoggedIn = auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
 
         if (isLoggedIn) {
             model.addAttribute("titles", titleService.getAllTitles());

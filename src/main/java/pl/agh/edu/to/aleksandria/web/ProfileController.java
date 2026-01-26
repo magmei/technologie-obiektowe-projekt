@@ -25,15 +25,11 @@ public class ProfileController {
     public String profile(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) auth.getPrincipal();
-
         model.addAttribute("user", user);
 
-        // 1. Fetch User's Rentals
         List<Rental> rentals = rentalService.getRentalsByUser(user.getId());
         model.addAttribute("rentals", rentals);
 
-        // 2. Fetch User's Queue
-        // CHANGED: Calling the existing method from your QueueService
         List<QueueEntry> queue = queueService.getAllUserQueueEntries(user.getId());
         model.addAttribute("queue", queue);
 

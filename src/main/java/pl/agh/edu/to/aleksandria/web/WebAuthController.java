@@ -57,19 +57,15 @@ public class WebAuthController {
 
     @GetMapping("/logout")
     public String logout(HttpServletResponse response, HttpServletRequest request) {
-        // 1. Create a "Death Cookie" with the exact same name and path
-        Cookie cookie = new Cookie("JWT_TOKEN", ""); // Set value to empty string
-        cookie.setPath("/");                         // MUST MATCH LOGIN PATH EXACTLY
+        Cookie cookie = new Cookie("JWT_TOKEN", "");
+        cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);                         // 0 seconds = delete immediately
+        cookie.setMaxAge(0);
 
-        // 2. Add it to the response
         response.addCookie(cookie);
 
-        // 3. Clear Spring Security context
         SecurityContextHolder.clearContext();
 
-        // 4. Invalidate any JSESSIONID that Spring might have created
         if (request.getSession(false) != null) {
             request.getSession(false).invalidate();
         }
