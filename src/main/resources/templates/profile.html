@@ -47,34 +47,79 @@
   </div>
 
   <div class="card" th:if="${user.role.name == 'reader'}">
-    <h3>My Rentals</h3>
+    <h3>Active Rentals</h3>
 
-    <div th:if="${rentals == null or rentals.empty}" class="text-muted">
-      <p>You have no books currently rented.</p>
+    <div th:with="activeRentals=${rentals != null ? rentals.?[returnedOn == null] : {}}">
+
+      <div th:if="${activeRentals.empty}" class="text-muted">
+        <p>You have no books currently rented.</p>
+      </div>
+
+      <table th:if="${!activeRentals.empty}">
+        <thead>
+        <tr>
+          <th>Book Title</th>
+          <th>Rented On</th>
+          <th>Due Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rental : ${activeRentals}">
+          <td>
+            <a th:href="@{/titles/view/{id}(id=${rental.book.title.id})}"
+               th:text="${rental.book.title.titleName}"
+               class="link-title">Title</a>
+            <br/>
+            <small class="text-muted" th:text="'Copy ID: ' + ${rental.book.itemId}">ID</small>
+          </td>
+          <td th:text="${rental.rentedOn}">2025-01-01</td>
+          <td th:text="${rental.due}"
+              th:style="${rental.due.isBefore(#temporals.createToday())} ? 'color: red; font-weight: bold;' : ''">
+            2025-01-15
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <table th:if="${rentals != null and !rentals.empty}">
-      <thead>
-      <tr>
-        <th>Book Title</th>
-        <th>Rented On</th>
-        <th>Due Date</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="rental : ${rentals}">
-        <td>
-          <a th:href="@{/titles/view/{id}(id=${rental.book.title.id})}"
-             th:text="${rental.book.title.titleName}"
-             class="link-title">Title</a>
-          <br/>
-          <small class="text-muted" th:text="'Copy ID: ' + ${rental.book.itemId}">ID</small>
-        </td>
-        <td th:text="${rental.rentedOn}">2025-01-01</td>
-        <td th:text="${rental.due}">2025-01-15</td>
-      </tr>
-      </tbody>
-    </table>
+  <div class="card" th:if="${user.role.name == 'reader'}">
+    <h3>Rental History</h3>
+
+    <div th:with="historyRentals=${rentals != null ? rentals.?[returnedOn != null] : {}}">
+
+      <div th:if="${historyRentals.empty}" class="text-muted">
+        <p>No past rental history.</p>
+      </div>
+
+      <table th:if="${!historyRentals.empty}">
+        <thead>
+        <tr>
+          <th>Book Title</th>
+          <th>Rented On</th>
+          <th>Returned On</th>
+          <th>Fee</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rental : ${historyRentals}">
+          <td>
+            <a th:href="@{/titles/view/{id}(id=${rental.book.title.id})}"
+               th:text="${rental.book.title.titleName}"
+               class="link-title" style="color: #666;">Title</a>
+            <br/>
+            <small class="text-muted" th:text="'Copy ID: ' + ${rental.book.itemId}">ID</small>
+          </td>
+          <td th:text="${rental.rentedOn}">2025-01-01</td>
+          <td th:text="${rental.returnedOn}">2025-01-10</td>
+          <td>
+            <span th:if="${rental.fee > 0}" th:text="${rental.fee} + ' PLN'" style="color: red;">5.0 PLN</span>
+            <span th:if="${rental.fee == 0}" style="color: green;">-</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="card" th:if="${user.role.name == 'reader'}">
