@@ -16,4 +16,6 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
     List<Rental> findByBook_Title_Id(long titleId);
 
     List<Rental> findByDueAndReturnedOnIsNull(LocalDate due);
+
+    List<Rental> findByBook_Title_IdAndReturnedOnIsNull(long titleId);
 }

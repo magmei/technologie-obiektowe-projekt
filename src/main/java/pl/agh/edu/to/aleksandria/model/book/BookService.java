@@ -43,6 +43,10 @@ public class BookService {
         return bookRepository.findByAvailableTrueAndTitle_TitleName(title);
     }
 
+    public List<Book> getBooksByTitleId(Integer title_id) {
+        return bookRepository.findByTitle(titleRepository.findById(title_id).orElse(null));
+    }
+
     public Optional<Book> createBook(Integer title_id) {
         Optional<Title> title = titleRepository.findById(title_id);
 

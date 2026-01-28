@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Aleksandria Library</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<header>
+    <h1>Aleksandria Library</h1>
+
+    <div sec:authorize="!isAuthenticated()">
+        <a th:href="@{/login}" class="btn login-btn">Login</a>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        <span style="margin-right: 15px;">Welcome, <span sec:authentication="name">User</span></span>
+
+        <a th:href="@{/profile}" class="btn" style="background-color: #28a745; color: white; margin-right: 10px;">My Profile</a>
+        <a th:href="@{/users/list}" class="btn btn-primary" style="margin-right: 10px;" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">Manage Users</a>
+        <a th:href="@{/stats}" class="btn btn-primary" style="margin-right: 10px;" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">Statistics</a>
+        <button onclick="openModal()" class="btn btn-primary" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">+ Add New Title</button>
+    </div>
+
+
+</header>
+
+<div class="container">
+
+    <div sec:authorize="!isAuthenticated()" class="hero" style="text-align: center; padding: 50px 20px;">
+        <h2>Welcome to Aleksandria</h2>
+        <p style="font-size: 1.2rem; color: #555;">
+            Please log in to browse our catalog, rent books, and manage your account.
+        </p>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        <h2>Library Catalog</h2>
+
+        <div th:if="${titles == null or titles.empty}" style="text-align: center; color: #777;">
+            <p>No titles found in the library.</p>
+        </div>
+
+        <table th:if="${titles != null and !titles.empty}">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="title : ${titles}">
+                <td th:text="${title.id}">1</td>
+                <td>
+                    <a th:href="@{/titles/view/{id}(id=${title.id})}"
+                       th:text="${title.titleName}"
+                       style="color: #007bff; text-decoration: none; font-weight: bold;">
+                        The Great Gatsby
+                    </a>
+                </td>
+                <td th:text="${title.author}">Author Name</td>
+                <td>
+                    <span th:each="g, iterStat : ${title.genres}"
+                          th:text="${g.name} + (!${iterStat.last} ? ', ' : '')">Genre</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="addTitleModal" class="modal" sec:authorize="hasAnyRole('LIBRARIAN', 'ADMIN')">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+
+        <h2>Add New Title</h2>
+
+        <form th:action="@{/titles/web/create}" method="post">
+            <div class="form-group">
+                <label for="titleName">Book Title</label>
+                <input type="text" id="titleName" name="titleName" placeholder="e.g. The Hobbit" required />
+            </div>
+
+            <div class="form-group">
+                <label for="author">Author</label>
+                <input type="text" id="author" name="author" placeholder="e.g. J.R.R. Tolkien" required />
+            </div>
+
+            <div class="form-group">
+                <label for="genreId">Genre ID</label>
+                <input type="number" id="genreId" name="genreId" placeholder="e.g. 1" required />
+                <small class="text-muted" style="display:block; margin-top:5px;">Enter a valid Genre ID.</small>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Title</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var modal = document.getElementById("addTitleModal");
+
+    function openModal() {
+        if(modal) modal.style.display = "flex";
+    }
+
+    function closeModal() {
+        if(modal) modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>

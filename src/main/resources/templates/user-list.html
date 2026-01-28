@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <title>User Management - Aleksandria</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<header>
+  <h1><a th:href="@{/}" class="logo">Aleksandria Library</a></h1>
+  <div class="user-menu">
+    <span><strong sec:authentication="name">User</strong></span>
+    <a th:href="@{/profile}" class="btn btn-sm btn-success">Profile</a>
+    <a th:href="@{/logout}" class="btn btn-sm btn-danger">Logout</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="flex-between">
+    <h2>User Management</h2>
+
+    <div th:if="${successMessage}"
+         style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+      <span th:text="${successMessage}">Success!</span>
+    </div>
+
+    <div th:if="${errorMessage}"
+         style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #f5c6cb;">
+      <span th:text="${errorMessage}">Error!</span>
+    </div>
+
+    <div sec:authorize="hasRole('ADMIN')">
+      <button onclick="openCreateUserModal()" class="btn btn-primary">+ Add New User</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="user : ${users}">
+        <td th:text="${user.id}">1</td>
+        <td>
+          <a th:href="@{/users/details/{id}(id=${user.id})}"
+             th:text="${user.firstName} + ' ' + ${user.lastName}"
+             style="color: #007bff; font-weight: bold; text-decoration: none;">
+            John Doe
+          </a>
+        </td>
+
+        <td th:text="${user.email}">email@example.com</td>
+        <td>
+          <span class="badge" th:classappend="'role-' + ${user.role.name}" th:text="${user.role.name}">READER</span>
+        </td>
+        <td>
+          <div th:if="${#authentication.principal.role.name == 'admin' or (#authentication.principal.role.name == 'librarian' and user.role.name == 'reader')}">
+            <form th:action="@{/users/delete}" method="post" onsubmit="return confirm('Are you sure you want to delete this user?');">
+              <input type="hidden" name="id" th:value="${user.id}" />
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </div>
+          <div th:unless="${#authentication.principal.role.name == 'admin' or (#authentication.principal.role.name == 'librarian' and user.role.name == 'reader')}">
+            <span class="text-muted" style="font-size:0.8em;">Protected</span>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="createUserModal" class="modal">
+  <div class="modal-content" style="width: 500px;">
+    <span class="close-btn" onclick="closeCreateUserModal()">&times;</span>
+
+    <h2 style="margin-top: 0;">Create New User</h2>
+
+    <form th:action="@{/users/web/create}" method="post">
+
+      <div style="display: flex; gap: 15px;">
+        <div class="form-group" style="flex: 1;">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required />
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email (Login)</label>
+        <input type="text" id="email" name="email" placeholder="staff@aleksandria.pl" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Initial Password</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" placeholder="e.g. Street 123, City" required/>
+      </div>
+
+      <div class="form-group">
+        <label for="roleName">Assign Role</label>
+        <select id="roleName" name="roleName" required style="width: 100%; padding: 10px;">
+          <option value="reader">Reader</option>
+          <option value="librarian">Librarian</option>
+          <option value="admin">Admin</option>
+        </select>
+        <small class="text-muted" style="display:block; margin-top:5px;">
+          Admins have full access. Librarians can manage books and readers.
+        </small>
+      </div>
+
+      <div style="margin-top: 25px;">
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var userModal = document.getElementById("createUserModal");
+
+  function openCreateUserModal() {
+    userModal.style.display = "flex";
+  }
+
+  function closeCreateUserModal() {
+    userModal.style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    if (event.target == userModal) {
+      closeCreateUserModal();
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -48,27 +48,6 @@ public class TestConfiguration {
         }
         System.out.println("Rentals for title 1: " + rentalService.getRentalsByTitle(1));
 
-        queueService.addUserToQueue(new QueueRequest(1, 1));
-        queueService.addUserToQueue(new QueueRequest(2, 1));
-        queueService.addUserToQueue(new QueueRequest(3, 2));
-        queueService.addUserToQueue(new QueueRequest(1, 2));
-
-        System.out.println("queue: user 1 for book 1: " + queueService.getPositionInQueue(1, 1));
-        System.out.println("queue: user 2 for book 1: " + queueService.getPositionInQueue(2, 1));
-        System.out.println("queue: user 1 for book 2: " + queueService.getPositionInQueue(1, 2));
-
-        System.out.println("Users in queue for book 1: " + queueService.getUsersWaitingForTitle(1).size());
-        System.out.println("Users in queue for book 2: " + queueService.getUsersWaitingForTitle(2).size());
-
-        queueService.removeUserFromQueue(new QueueRequest(1, 1));
-        queueService.removeUserFromQueue(new QueueRequest(1, 2));
-
-        System.out.println("queue: user 2 for book 1: " + queueService.getPositionInQueue(2, 1));
-        System.out.println("queue: user 3 for book 2: " + queueService.getPositionInQueue(3, 2));
-
-        System.out.println("Users in queue for book 1: " + queueService.getUsersWaitingForTitle(1).size());
-        System.out.println("Users in queue for book 2: " + queueService.getUsersWaitingForTitle(2).size());
-
         System.out.println("Reviews of book 1: " + reviewRepository.findByTitleId(1));
     }
 }

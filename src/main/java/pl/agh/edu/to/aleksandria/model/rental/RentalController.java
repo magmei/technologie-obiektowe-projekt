@@ -5,7 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pl.agh.edu.to.aleksandria.model.book.Book;
+import pl.agh.edu.to.aleksandria.model.book.BookRepository;
+import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
+import pl.agh.edu.to.aleksandria.model.queue.QueueService;
+import pl.agh.edu.to.aleksandria.model.queue.dtos.QueueRequest;
 import pl.agh.edu.to.aleksandria.model.rental.dtos.CreateRentalRequest;
+import pl.agh.edu.to.aleksandria.model.rental.dtos.ExtendRentalRequest;
+import pl.agh.edu.to.aleksandria.model.user.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -110,11 +117,16 @@ public class RentalController {
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ResponseEntity<Object> createRental(CreateRentalRequest request) {
-        return this.optionalToResponseEntity(
-                rentalService.createRental(request),
-                HttpStatus.BAD_REQUEST,
-                "Could not create rental with given data"
-        );
+        if (rentalService.isRentalPossible(request.getUserId(), request.getBookId())) {
+            return this.optionalToResponseEntity(
+                    rentalService.createRental(request),
+                    HttpStatus.BAD_REQUEST,
+                    "Could not create rental with given data"
+            );
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Cannot create rental for given user and book"));
+        }
     }
 
     // POST /rentals/return?rental_id=
@@ -125,6 +137,21 @@ public class RentalController {
                 rentalService.returnRental(rental_id),
                 HttpStatus.BAD_REQUEST,
                 "Could not return rental with given id"
+        );
+    }
+
+    // =======================
+    // *** PATCH endpoints ***
+    // =======================
+
+    // PATCH /rentals/extend
+    @PatchMapping("/extend")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ResponseEntity<Object> extendRental(@RequestBody ExtendRentalRequest request) {
+        return this.optionalToResponseEntity(
+                rentalService.extendRental(request),
+                HttpStatus.BAD_REQUEST,
+                "Could not extend rental with given data"
         );
     }
 

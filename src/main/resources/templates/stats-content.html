@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="rated">
+  <h3>Top Rated Books</h3>
+  <p th:if="${bestTitles.empty}" class="text-muted">No ratings recorded yet.</p>
+  <table th:if="${!bestTitles.empty}">
+    <thead>
+    <tr>
+      <th class="sortable" onclick="sortTable(this, 0)">Title</th>
+      <th class="sortable" onclick="sortTable(this, 1)">Author</th>
+      <th class="sortable" onclick="sortTable(this, 2)">Average Rating</th>
+      <th class="sortable" onclick="sortTable(this, 3)">Ratings</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="stat : ${bestTitles}">
+      <td th:text="${stat.titleName}">Title</td>
+      <td th:text="${stat.author}">Author</td>
+      <td th:data-val="${stat.averageRating}">
+        <span style="color: #ffc107;">&#9733;</span>
+        <span th:text="${#numbers.formatDecimal(stat.averageRating, 1, 1)}">4.5</span>
+      </td>
+      <td th:text="${stat.ratingCount}" th:data-val="${stat.ratingCount}">10</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:fragment="availability">
+  <h3>Book Availability</h3>
+  <table th:if="${!bookCounts.empty}">
+    <thead>
+    <tr>
+      <th class="sortable" onclick="sortTable(this, 0)">Title</th>
+      <th class="sortable" onclick="sortTable(this, 1)">Copies</th>
+      <th class="sortable" onclick="sortTable(this, 2)">Available Now</th>
+      <th class="sortable" onclick="sortTable(this, 3)">Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="stat : ${bookCounts}">
+      <td th:text="${stat.bookTitle}">Title</td>
+      <td th:text="${stat.allBookCount}" th:data-val="${stat.allBookCount}">5</td>
+      <td th:text="${stat.availableBookCount}" th:data-val="${stat.availableBookCount}" style="font-weight: bold;">2</td>
+      <td th:data-val="${stat.availableBookCount > 0 ? 'Available' : 'Out'}">
+        <span th:if="${stat.availableBookCount > 0}" style="color: green; font-size: 0.9em;">Available</span>
+        <span th:if="${stat.availableBookCount == 0}" style="color: red; font-size: 0.9em;">Out of Stock</span>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:fragment="financials">
+  <h3>Financial Summary</h3>
+  <div style="display: flex; gap: 40px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+    <div>
+      <span class="label" style="display:block; color:#555; margin-bottom:5px;">Total Fees Collected</span>
+      <strong style="color: green; font-size: 1.6em;" th:text="${feesSummary.totalPaid} + ' PLN'">0.0 PLN</strong>
+    </div>
+    <div>
+      <span class="label" style="display:block; color:#555; margin-bottom:5px;">Outstanding Debt</span>
+      <strong style="color: #dc3545; font-size: 1.6em;" th:text="${feesSummary.totalToBePaid} + ' PLN'">0.0 PLN</strong>
+    </div>
+  </div>
+
+  <h4>User Debt Breakdown</h4>
+  <div style="max-height: 400px; overflow-y: auto;">
+    <table>
+      <thead>
+      <tr>
+        <th class="sortable" onclick="sortTable(this, 0)">User Name</th>
+        <th class="sortable" onclick="sortTable(this, 1)">Total Paid</th>
+        <th class="sortable" onclick="sortTable(this, 2)">Current Debt</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="userStat : ${feesSummary.feesByUser}" th:if="${userStat.totalToBePaid > 0}">
+        <td>
+          <a th:href="@{/users/details/{id}(id=${userStat.userId})}" th:text="${userStat.fullName}" target="_blank">User</a>
+        </td>
+        <td th:data-val="${userStat.totalPaid}" th:text="${userStat.totalPaid} + ' PLN'">0.0</td>
+        <td th:data-val="${userStat.totalToBePaid}" style="color: red; font-weight: bold;" th:text="${userStat.totalToBePaid} + ' PLN'">10.0</td>
+      </tr>
+      <tr th:if="${feesSummary.feesByUser.isEmpty() or feesSummary.totalToBePaid == 0}">
+        <td colspan="3" class="text-muted" style="text-align: center;">No outstanding debts.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div th:fragment="popular-books">
+  <h3>Most Rented Books</h3>
+  <table>
+    <thead>
+    <tr>
+      <th class="sortable" onclick="sortTable(this, 0)">Title</th>
+      <th class="sortable" onclick="sortTable(this, 1)">Author</th>
+      <th class="sortable" onclick="sortTable(this, 2)">All Rentals</th>
+      <th class="sortable" onclick="sortTable(this, 3)">Currently Rented</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="stat : ${popularBooks}">
+      <td th:text="${stat.bookTitle}">Title</td>
+      <td th:text="${stat.bookAuthor}">Author</td>
+      <td th:data-val="${stat.rentedCount}"><strong th:text="${stat.rentedCount}">100</strong></td>
+      <td th:text="${stat.rentedRightNow}" th:data-val="${stat.rentedRightNow}">5</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div th:fragment="popular-genres">
+  <h3>Genre Popularity</h3>
+  <table>
+    <thead>
+    <tr>
+      <th class="sortable" onclick="sortTable(this, 0)">Genre Name</th>
+      <th class="sortable" onclick="sortTable(this, 1)">All Rentals</th>
+      <th class="sortable" onclick="sortTable(this, 2)">Current Rentals</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="stat : ${popularGenres}">
+      <td th:text="${stat.genreName}">Sci-Fi</td>
+      <td th:data-val="${stat.rentedCount}"><strong th:text="${stat.rentedCount}">50</strong></td>
+      <td th:text="${stat.rentedRightNow}" th:data-val="${stat.rentedRightNow}">2</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

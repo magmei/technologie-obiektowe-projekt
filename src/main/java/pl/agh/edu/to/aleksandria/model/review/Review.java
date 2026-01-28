@@ -12,6 +12,7 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
     int reviewId;
 
     @Setter

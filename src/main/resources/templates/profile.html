@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>User Profile</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<div class="container">
+  <a th:href="@{/}" class="back-link" style="display: inline-block; margin-bottom: 20px;">&larr; Back</a>
+
+  <div class="card">
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+
+      <div style="display:flex; align-items:center; gap: 15px;">
+        <h2 th:text="${user.firstName} + ' ' + ${user.lastName}">John Doe</h2>
+      </div>
+
+      <div style="display:flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+        <span class="badge" th:classappend="'role-' + ${user.role.name}" th:text="${user.role.name}">ROLE</span>
+        <div style="display:flex; gap: 10px;">
+          <button onclick="openEditProfileModal()" class="btn btn-primary">Edit Profile</button>
+          <a th:href="@{/logout}" class="btn btn-primary">Logout</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="info-grid" style="display: flex; flex-direction: column; gap: 8px;">
+
+      <div>
+        <span class="label" style="font-weight: bold;">Email:</span>
+        <span th:text="${user.email}">email@example.com</span>
+      </div>
+
+      <div>
+        <span class="label" style="font-weight: bold;">Address:</span>
+        <span th:text="${user.address}">Street 1</span>
+      </div>
+
+      <div>
+        <span class="label" style="font-weight: bold;">User ID:</span>
+        <span th:text="${user.id}">1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" th:if="${user.role.name == 'reader'}">
+    <h3>Active Rentals</h3>
+
+    <div th:with="activeRentals=${rentals != null ? rentals.?[returnedOn == null] : {}}">
+
+      <div th:if="${activeRentals.empty}" class="text-muted">
+        <p>You have no books currently rented.</p>
+      </div>
+
+      <table th:if="${!activeRentals.empty}">
+        <thead>
+        <tr>
+          <th>Book Title</th>
+          <th>Rented On</th>
+          <th>Due Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rental : ${activeRentals}">
+          <td>
+            <a th:href="@{/titles/view/{id}(id=${rental.book.title.id})}"
+               th:text="${rental.book.title.titleName}"
+               class="link-title">Title</a>
+            <br/>
+            <small class="text-muted" th:text="'Copy ID: ' + ${rental.book.itemId}">ID</small>
+          </td>
+          <td th:text="${rental.rentedOn}">2025-01-01</td>
+          <td th:text="${rental.due}"
+              th:style="${rental.due.isBefore(#temporals.createToday())} ? 'color: red; font-weight: bold;' : ''">
+            2025-01-15
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" th:if="${user.role.name == 'reader'}">
+    <h3>Rental History</h3>
+
+    <div th:with="historyRentals=${rentals != null ? rentals.?[returnedOn != null] : {}}">
+
+      <div th:if="${historyRentals.empty}" class="text-muted">
+        <p>No past rental history.</p>
+      </div>
+
+      <table th:if="${!historyRentals.empty}">
+        <thead>
+        <tr>
+          <th>Book Title</th>
+          <th>Rented On</th>
+          <th>Returned On</th>
+          <th>Fee</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rental : ${historyRentals}">
+          <td>
+            <a th:href="@{/titles/view/{id}(id=${rental.book.title.id})}"
+               th:text="${rental.book.title.titleName}"
+               class="link-title" style="color: #666;">Title</a>
+            <br/>
+            <small class="text-muted" th:text="'Copy ID: ' + ${rental.book.itemId}">ID</small>
+          </td>
+          <td th:text="${rental.rentedOn}">2025-01-01</td>
+          <td th:text="${rental.returnedOn}">2025-01-10</td>
+          <td>
+            <span th:if="${rental.fee > 0}" th:text="${rental.fee} + ' PLN'" style="color: red;">5.0 PLN</span>
+            <span th:if="${rental.fee == 0}" style="color: green;">-</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" th:if="${user.role.name == 'reader'}">
+    <h3>My Queue Status</h3>
+
+    <div th:if="${queue == null or queue.empty}" class="text-muted">
+      <p>You are not waiting for any books.</p>
+    </div>
+
+    <table th:if="${queue != null and !queue.empty}">
+      <thead>
+      <tr>
+        <th>Book Title</th>
+        <th>Requested On</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="entry : ${queue}">
+        <td>
+          <a th:href="@{/titles/view/{id}(id=${entry.title.id})}"
+             th:text="${entry.title.titleName}"
+             class="link-title">Title</a>
+        </td>
+        <td th:text="${#temporals.format(entry.requestDate, 'yyyy-MM-dd HH:mm')}">2025-01-01</td>
+        <td>
+          <form th:action="@{/queue/leave}" method="post" style="display:inline;" onsubmit="return confirm('Leave queue?');">
+            <input type="hidden" name="titleId" th:value="${entry.title.id}" />
+            <button type="submit" class="btn btn-danger btn-sm">Leave Queue</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="editProfileModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeEditProfileModal()">&times;</span>
+
+    <h2>Edit My Profile</h2>
+
+    <form th:action="@{/users/web/update}" method="post">
+      <input type="hidden" name="id" th:value="${user.id}" />
+
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="firstName" th:value="${user.firstName}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="lastName" th:value="${user.lastName}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" th:value="${user.email}" required />
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" th:value="${user.address}" required />
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-warning" style="width: 100%;">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var profileModal = document.getElementById("editProfileModal");
+
+  function openEditProfileModal() {
+    profileModal.style.display = "flex";
+  }
+
+  function closeEditProfileModal() {
+    profileModal.style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    if (event.target == profileModal) {
+      closeEditProfileModal();
+    }
+  }
+</script>
+
+</body>
+</html>

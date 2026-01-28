@@ -3,6 +3,7 @@ package pl.agh.edu.to.aleksandria.notifications;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import pl.agh.edu.to.aleksandria.config.RentalConfig;
 import pl.agh.edu.to.aleksandria.model.book.Book;
 import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
 import pl.agh.edu.to.aleksandria.model.rental.Rental;
@@ -12,6 +13,8 @@ import pl.agh.edu.to.aleksandria.model.user.User;
 @Getter
 @AllArgsConstructor
 public class MailGenerator {
+
+    private final RentalConfig rentalConfig;
 
     public static String getOnRentalMailSubject(Book book) {
         return "Rental of " + book.getTitle().getTitleName() + " confirmed.";
@@ -23,6 +26,10 @@ public class MailGenerator {
 
     public static String getRentalPastDueMailSubject(Book book) {
         return "Rental of " + book.getTitle().getTitleName() + " is past due!";
+    }
+
+    public static String getRentalExtendedMailSubject(Book book) {
+        return "Rental of " + book.getTitle().getTitleName() + " is extended!";
     }
 
     public static String getRentalReturnedMailSubject(Book book) {
@@ -49,10 +56,16 @@ public class MailGenerator {
                "Please return your book before that. Otherwise, you will be charged extra fee of 2.5 PLN for every day of the delay.\n";
     }
 
-    public static String getRentalPastDueMailMessage(User user, Book book) {
+    public static String getRentalExtendedMailMessage(User user, Book book, Rental rental, int extendedDays) {
+        return "Hello " + user.getFirstName() + ",\n" +
+               "Your rental of " + book.getTitle().getTitleName() + " has been successfully extended by " + extendedDays + (extendedDays == 1 ? " day." : " days.") + "\n" +
+               "The new due date for your rental is " + rental.getDue() + ".";
+    }
+
+    public static String getRentalPastDueMailMessage(User user, Book book, double dailyRate) {
         return "Hello " + user.getFirstName() + ",\n" +
                "Your rental of " + book.getTitle().getTitleName() + " is past due. From this day onward an extra fee " +
-               "of 2.5 PLN per day will be charged.";
+               "of " +  dailyRate +  " PLN per day will be charged.";
     }
 
     public static String getRentalReturnedMailMessage(User user, Book book, Rental rental) {

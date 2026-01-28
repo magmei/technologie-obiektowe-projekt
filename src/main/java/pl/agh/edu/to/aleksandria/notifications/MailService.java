@@ -1,19 +1,20 @@
 package pl.agh.edu.to.aleksandria.notifications;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import pl.agh.edu.to.aleksandria.config.RentalConfig;
 import pl.agh.edu.to.aleksandria.model.queue.QueueEntry;
 import pl.agh.edu.to.aleksandria.model.rental.Rental;
 
 @Service
+@RequiredArgsConstructor
 public class MailService {
 
     private final JavaMailSender mailSender;
+    private final RentalConfig rentalConfig;
 
-    public MailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
 
     public void sendOnRentalEmail(Rental rental) {
         this.sendEmail(
@@ -31,11 +32,19 @@ public class MailService {
         );
     }
 
+    public void sendOnRentalExtendedEmail(Rental rental, int extendedDays) {
+        this.sendEmail(
+                rental.getUser().getEmail(),
+                MailGenerator.getRentalExtendedMailSubject(rental.getBook()),
+                MailGenerator.getRentalExtendedMailMessage(rental.getUser(), rental.getBook(), rental, extendedDays)
+        );
+    }
+
     public void sendOnRentalPastDueEmail(Rental rental) {
         this.sendEmail(
                 rental.getUser().getEmail(),
                 MailGenerator.getRentalPastDueMailSubject(rental.getBook()),
-                MailGenerator.getRentalPastDueMailMessage(rental.getUser(), rental.getBook())
+                MailGenerator.getRentalPastDueMailMessage(rental.getUser(), rental.getBook(), rentalConfig.getLateFee())
         );
     }
 
